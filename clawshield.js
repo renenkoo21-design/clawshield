@@ -1,6 +1,7 @@
 // ============================================================
 // CLAWSHIELD — AI Firewall Middleware
 // Node.js 18+ | Express + Groq API
+// Supports: Generic /chat + GoHighLevel webhooks
 // No chatbot. No personality. Detection only.
 // ============================================================
 
@@ -17,7 +18,7 @@ const https = require("https");
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
 // ✅ PASTE YOUR GROQ API KEY BETWEEN THE QUOTES BELOW
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const GROQ_HOST = "api.groq.com";
@@ -34,6 +35,7 @@ const ALL_INPUTS_LOG = path.join(LOG_DIR, "all_inputs.log");
 const BLOCKED_LOG = path.join(LOG_DIR, "blocked.log");
 const FLAGGED_LOG = path.join(LOG_DIR, "flagged.log");
 const ERRORS_LOG = path.join(LOG_DIR, "errors.log");
+const GHL_LOG = path.join(LOG_DIR, "ghl_events.log");
 
 fs.mkdirSync(LOG_DIR, { recursive: true });
 
@@ -333,8 +335,8 @@ function computeRiskScore(normalizedInput, repeatCount) {
   let riskLevel = "low";
   let action = "allow";
 
-  if (riskScore >= 6) { riskLevel = "high"; action = "block"; }
-  else if (riskScore >= 3) { riskLevel = "medium"; action = "review"; }
+  if (riskScore >= 4) { riskLevel = "high"; action = "block"; }
+  else if (riskScore >= 2) { riskLevel = "medium"; action = "review"; }
 
   return { riskScore, riskLevel, action, triggeredPatterns, proximityMatches };
 }
@@ -415,12 +417,55 @@ function forwardToGroq(originalInput) {
 }
 
 // ============================================================
+// CORE FIREWALL LOGIC — shared by all routes
+// ============================================================
+
+async function runFirewall(messageText, ip, userAgent, requestId) {
+  const normalized = normalizeInput(messageText);
+  const normalizedInput = normalized.normalized;
+
+  const repeatCount = getRepeatCount(ip, normalizedInput);
+  const decision = computeRiskScore(normalizedInput, repeatCount);
+  const session = updateSession(ip, normalizedInput, decision.action);
+
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    requestId,
+    ip,
+    userAgent,
+    rawInput: normalized.original,
+    normalizedInput,
+    inputLength: messageText.length,
+    triggeredPatterns: decision.triggeredPatterns,
+    proximityMatches: decision.proximityMatches,
+    riskScore: decision.riskScore,
+    riskLevel: decision.riskLevel,
+    action: decision.action,
+    repeatCount,
+    sessionRequestCount: session.requestCount,
+    sessionBlockedCount: session.blockedCount
+  };
+
+  writeLog(ALL_INPUTS_LOG, logEntry);
+
+  if (decision.action === "block") {
+    writeLog(BLOCKED_LOG, logEntry);
+  }
+  if (decision.action === "review") {
+    writeLog(FLAGGED_LOG, logEntry);
+  }
+
+  return { decision, logEntry, normalized };
+}
+
+// ============================================================
 // MODULE 8 — EXPRESS SERVER
 // ============================================================
 
 const app = express();
 
 app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use((err, req, res, next) => {
   if (err) {
@@ -459,7 +504,7 @@ app.use((req, res, next) => {
 });
 
 // ============================================================
-// POST /chat
+// POST /chat — Generic firewall route
 // ============================================================
 
 app.post("/chat", async (req, res) => {
@@ -467,7 +512,6 @@ app.post("/chat", async (req, res) => {
   const ip = req.clientIp;
   const userAgent = req.get("user-agent") || "";
   let rawInput = "";
-  let normalizedInput = "";
 
   try {
     if (!req.body || typeof req.body.message !== "string") {
@@ -477,48 +521,18 @@ app.post("/chat", async (req, res) => {
 
     rawInput = req.body.message;
 
-    const normalized = normalizeInput(rawInput);
-    normalizedInput = normalized.normalized;
-
-    const repeatCount = getRepeatCount(ip, normalizedInput);
-    const decision = computeRiskScore(normalizedInput, repeatCount);
-    const session = updateSession(ip, normalizedInput, decision.action);
-    const durationMs = Date.now() - req.receivedAt;
-
-    const logEntry = {
-      timestamp: new Date().toISOString(),
-      requestId,
-      ip,
-      userAgent,
-      rawInput: normalized.original,
-      normalizedInput,
-      inputLength: rawInput.length,
-      triggeredPatterns: decision.triggeredPatterns,
-      proximityMatches: decision.proximityMatches,
-      riskScore: decision.riskScore,
-      riskLevel: decision.riskLevel,
-      action: decision.action,
-      repeatCount,
-      sessionRequestCount: session.requestCount,
-      sessionBlockedCount: session.blockedCount,
-      durationMs
-    };
-
-    writeLog(ALL_INPUTS_LOG, logEntry);
+    const { decision, normalized } = await runFirewall(rawInput, ip, userAgent, requestId);
 
     if (decision.action === "block") {
-      writeLog(BLOCKED_LOG, logEntry);
       res.status(403).json({ status: "BLOCKED", requestId });
       return;
     }
 
     if (decision.action === "review") {
-      writeLog(FLAGGED_LOG, logEntry);
       res.status(202).json({ status: "FLAGGED", requestId });
       return;
     }
 
-    // Forward clean input to Groq
     try {
       const upstream = await forwardToGroq(normalized.original);
       const contentType = upstream.headers["content-type"];
@@ -543,7 +557,6 @@ app.post("/chat", async (req, res) => {
       res.status(413).json({ status: "PAYLOAD_TOO_LARGE", maxBytes: MAX_INPUT_LENGTH });
       return;
     }
-
     writeLog(ERRORS_LOG, {
       timestamp: new Date().toISOString(),
       requestId,
@@ -551,8 +564,104 @@ app.post("/chat", async (req, res) => {
       rawInput,
       stack: err && err.stack ? err.stack : String(err)
     });
-
     res.status(500).json({ status: "INTERNAL_ERROR", requestId });
+  }
+});
+
+// ============================================================
+// POST /webhook/ghl — GoHighLevel webhook receiver
+// ============================================================
+//
+// HOW TO SET UP IN GOHIGHLEVEL:
+// 1. Go to Settings → Integrations → Webhooks
+// 2. Click "Add Webhook"
+// 3. Set URL to: https://clawshield-production.up.railway.app/webhook/ghl
+// 4. Select trigger: "Inbound Message" (or "Conversation Message")
+// 5. Save
+//
+// ClawShield will then inspect every inbound message before
+// GoHighLevel's AI sees it.
+// ============================================================
+
+app.post("/webhook/ghl", async (req, res) => {
+  const requestId = crypto.randomUUID();
+  const ip = req.clientIp;
+  const userAgent = req.get("user-agent") || "GoHighLevel";
+
+  try {
+    const body = req.body;
+
+    // Log the raw GHL event for debugging
+    writeLog(GHL_LOG, {
+      timestamp: new Date().toISOString(),
+      requestId,
+      raw: body
+    });
+
+    // Extract the message text from GHL webhook payload
+    // GHL sends different fields depending on the trigger type
+    const messageText =
+      body.message ||
+      body.body ||
+      body.text ||
+      body.messageBody ||
+      (body.conversation && body.conversation.lastMessage) ||
+      null;
+
+    // If no message found, just acknowledge and pass through
+    if (!messageText || typeof messageText !== "string" || messageText.trim().length === 0) {
+      res.status(200).json({
+        status: "ALLOWED",
+        reason: "no_message_content",
+        requestId
+      });
+      return;
+    }
+
+    const { decision } = await runFirewall(messageText, ip, userAgent, requestId);
+
+    // GoHighLevel expects a 200 response always
+    // We communicate the decision in the response body
+    if (decision.action === "block") {
+      res.status(200).json({
+        status: "BLOCKED",
+        requestId,
+        message: "Security threat detected. Message blocked by ClawShield."
+      });
+      return;
+    }
+
+    if (decision.action === "review") {
+      res.status(200).json({
+        status: "FLAGGED",
+        requestId,
+        message: "Suspicious message flagged for review by ClawShield."
+      });
+      return;
+    }
+
+    // Clean — allow through
+    res.status(200).json({
+      status: "ALLOWED",
+      requestId,
+      message: messageText
+    });
+
+  } catch (err) {
+    writeLog(ERRORS_LOG, {
+      timestamp: new Date().toISOString(),
+      requestId,
+      ip,
+      error: err && err.message ? err.message : String(err),
+      stack: err && err.stack ? err.stack : ""
+    });
+
+    // Always return 200 to GHL so it doesn't retry endlessly
+    res.status(200).json({
+      status: "ERROR",
+      requestId,
+      message: "ClawShield internal error. Message passed through."
+    });
   }
 });
 
