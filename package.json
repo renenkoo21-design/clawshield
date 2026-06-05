@@ -1,1 +1,11 @@
-﻿{"name":"clawshield","version":"1.0.0","main":"clawshield.js","scripts":{"start":"node clawshield.js"},"dependencies":{"express":"^4.18.2"}}
+{
+  "name": "clawshield",
+  "version": "1.0.0",
+  "main": "clawshield.js",
+  "scripts": {
+    "start": "node clawshield.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
