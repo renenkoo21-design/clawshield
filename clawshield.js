@@ -17,7 +17,7 @@ const https = require("https");
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
-// ✅ PASTE YOUR GROQ API KEY BETWEEN THE QUOTES BELOW
+// ✅ YOUR GROQ API KEY IS BELOW — DO NOT CHANGE THIS LINE
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
 const GROQ_MODEL = "llama-3.3-70b-versatile";
@@ -357,12 +357,7 @@ function forwardToGroq(originalInput) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
       model: GROQ_MODEL,
-      messages: [
-        {
-          role: "user",
-          content: originalInput
-        }
-      ]
+      messages: [{ role: "user", content: originalInput }]
     });
 
     const options = {
@@ -379,38 +374,16 @@ function forwardToGroq(originalInput) {
 
     const req = https.request(options, (res) => {
       const chunks = [];
-
-      res.on("data", (chunk) => {
-        chunks.push(chunk);
-      });
-
+      res.on("data", (chunk) => { chunks.push(chunk); });
       res.on("end", () => {
-        const body = Buffer.concat(chunks);
-        resolve({
-          statusCode: res.statusCode,
-          headers: res.headers,
-          body
-        });
+        resolve({ statusCode: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) });
       });
-
-      res.on("error", (err) => {
-        reject(err);
-      });
+      res.on("error", (err) => { reject(err); });
     });
 
-    const timer = setTimeout(() => {
-      req.destroy(new Error("GROQ_TIMEOUT"));
-    }, GROQ_TIMEOUT_MS);
-
-    req.on("error", (err) => {
-      clearTimeout(timer);
-      reject(err);
-    });
-
-    req.on("close", () => {
-      clearTimeout(timer);
-    });
-
+    const timer = setTimeout(() => { req.destroy(new Error("GROQ_TIMEOUT")); }, GROQ_TIMEOUT_MS);
+    req.on("error", (err) => { clearTimeout(timer); reject(err); });
+    req.on("close", () => { clearTimeout(timer); });
     req.write(payload);
     req.end();
   });
@@ -447,13 +420,8 @@ async function runFirewall(messageText, ip, userAgent, requestId) {
   };
 
   writeLog(ALL_INPUTS_LOG, logEntry);
-
-  if (decision.action === "block") {
-    writeLog(BLOCKED_LOG, logEntry);
-  }
-  if (decision.action === "review") {
-    writeLog(FLAGGED_LOG, logEntry);
-  }
+  if (decision.action === "block") writeLog(BLOCKED_LOG, logEntry);
+  if (decision.action === "review") writeLog(FLAGGED_LOG, logEntry);
 
   return { decision, logEntry, normalized };
 }
@@ -464,14 +432,20 @@ async function runFirewall(messageText, ip, userAgent, requestId) {
 
 const app = express();
 
+// ✅ CORS — allows the demo page to call this server from a browser
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") { res.sendStatus(200); return; }
+  next();
+});
+
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use((err, req, res, next) => {
-  if (err) {
-    res.status(400).json({ status: "BAD_REQUEST", code: "INVALID_JSON" });
-    return;
-  }
+  if (err) { res.status(400).json({ status: "BAD_REQUEST", code: "INVALID_JSON" }); return; }
   next();
 });
 
@@ -520,7 +494,6 @@ app.post("/chat", async (req, res) => {
     }
 
     rawInput = req.body.message;
-
     const { decision, normalized } = await runFirewall(rawInput, ip, userAgent, requestId);
 
     if (decision.action === "block") {
@@ -539,48 +512,24 @@ app.post("/chat", async (req, res) => {
       if (contentType) res.setHeader("Content-Type", contentType);
       res.status(upstream.statusCode).send(upstream.body);
     } catch (upstreamErr) {
-      writeLog(ERRORS_LOG, {
-        timestamp: new Date().toISOString(),
-        requestId,
-        error: upstreamErr.message,
-        stack: upstreamErr.stack || ""
-      });
+      writeLog(ERRORS_LOG, { timestamp: new Date().toISOString(), requestId, error: upstreamErr.message });
       res.status(502).json({ status: "UPSTREAM_ERROR" });
     }
 
   } catch (err) {
     if (err && (err.code === "INVALID_INPUT" || err.code === "EMPTY_INPUT")) {
-      res.status(400).json({ status: "BAD_REQUEST", code: err.code });
-      return;
+      res.status(400).json({ status: "BAD_REQUEST", code: err.code }); return;
     }
     if (err && err.code === "PAYLOAD_TOO_LARGE") {
-      res.status(413).json({ status: "PAYLOAD_TOO_LARGE", maxBytes: MAX_INPUT_LENGTH });
-      return;
+      res.status(413).json({ status: "PAYLOAD_TOO_LARGE", maxBytes: MAX_INPUT_LENGTH }); return;
     }
-    writeLog(ERRORS_LOG, {
-      timestamp: new Date().toISOString(),
-      requestId,
-      ip,
-      rawInput,
-      stack: err && err.stack ? err.stack : String(err)
-    });
+    writeLog(ERRORS_LOG, { timestamp: new Date().toISOString(), requestId, ip, rawInput, stack: err && err.stack ? err.stack : String(err) });
     res.status(500).json({ status: "INTERNAL_ERROR", requestId });
   }
 });
 
 // ============================================================
 // POST /webhook/ghl — GoHighLevel webhook receiver
-// ============================================================
-//
-// HOW TO SET UP IN GOHIGHLEVEL:
-// 1. Go to Settings → Integrations → Webhooks
-// 2. Click "Add Webhook"
-// 3. Set URL to: https://clawshield-production.up.railway.app/webhook/ghl
-// 4. Select trigger: "Inbound Message" (or "Conversation Message")
-// 5. Save
-//
-// ClawShield will then inspect every inbound message before
-// GoHighLevel's AI sees it.
 // ============================================================
 
 app.post("/webhook/ghl", async (req, res) => {
@@ -591,15 +540,8 @@ app.post("/webhook/ghl", async (req, res) => {
   try {
     const body = req.body;
 
-    // Log the raw GHL event for debugging
-    writeLog(GHL_LOG, {
-      timestamp: new Date().toISOString(),
-      requestId,
-      raw: body
-    });
+    writeLog(GHL_LOG, { timestamp: new Date().toISOString(), requestId, raw: body });
 
-    // Extract the message text from GHL webhook payload
-    // GHL sends different fields depending on the trigger type
     const messageText =
       body.message ||
       body.body ||
@@ -608,60 +550,28 @@ app.post("/webhook/ghl", async (req, res) => {
       (body.conversation && body.conversation.lastMessage) ||
       null;
 
-    // If no message found, just acknowledge and pass through
     if (!messageText || typeof messageText !== "string" || messageText.trim().length === 0) {
-      res.status(200).json({
-        status: "ALLOWED",
-        reason: "no_message_content",
-        requestId
-      });
+      res.status(200).json({ status: "ALLOWED", reason: "no_message_content", requestId });
       return;
     }
 
     const { decision } = await runFirewall(messageText, ip, userAgent, requestId);
 
-    // GoHighLevel expects a 200 response always
-    // We communicate the decision in the response body
     if (decision.action === "block") {
-      res.status(200).json({
-        status: "BLOCKED",
-        requestId,
-        message: "Security threat detected. Message blocked by ClawShield."
-      });
+      res.status(200).json({ status: "BLOCKED", requestId, message: "Security threat detected. Message blocked by ClawShield." });
       return;
     }
 
     if (decision.action === "review") {
-      res.status(200).json({
-        status: "FLAGGED",
-        requestId,
-        message: "Suspicious message flagged for review by ClawShield."
-      });
+      res.status(200).json({ status: "FLAGGED", requestId, message: "Suspicious message flagged for review by ClawShield." });
       return;
     }
 
-    // Clean — allow through
-    res.status(200).json({
-      status: "ALLOWED",
-      requestId,
-      message: messageText
-    });
+    res.status(200).json({ status: "ALLOWED", requestId, message: messageText });
 
   } catch (err) {
-    writeLog(ERRORS_LOG, {
-      timestamp: new Date().toISOString(),
-      requestId,
-      ip,
-      error: err && err.message ? err.message : String(err),
-      stack: err && err.stack ? err.stack : ""
-    });
-
-    // Always return 200 to GHL so it doesn't retry endlessly
-    res.status(200).json({
-      status: "ERROR",
-      requestId,
-      message: "ClawShield internal error. Message passed through."
-    });
+    writeLog(ERRORS_LOG, { timestamp: new Date().toISOString(), requestId, ip, error: err && err.message ? err.message : String(err) });
+    res.status(200).json({ status: "ERROR", requestId, message: "ClawShield internal error. Message passed through." });
   }
 });
 
