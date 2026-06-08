@@ -867,13 +867,8 @@ async function runFirewall(messageText, ip, userAgent, requestId) {
   let riskLevel = "low";
   let action = "allow";
 
-  if (finalScore >= 4) {
-    riskLevel = "high";
-    action = "block";
-  } else if (finalScore >= 2) {
-    riskLevel = "medium";
-    action = "review";
-  }
+if (finalScore >= 5) { riskLevel = "high"; action = "block"; }
+else if (finalScore >= 4) { riskLevel = "medium"; action = "review"; }
 
   const decision = {
     riskScore: finalScore,
