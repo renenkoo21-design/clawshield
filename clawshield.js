@@ -23,7 +23,7 @@ const GROQ_PATH = "/openai/v1/chat/completions";
 
 // ✅ SUPABASE CREDENTIALS
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://rpaerdytceslsehgomfj.supabase.co";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwYWVyZHl0Y2VzbHNlaGdvbWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNTc5OTEsImV4cCI6MjA5NjczMzk5MX0.UxYejMrGlJVjbMIDpW2xjeZweCsPSt94vZ2AGZHqbQM";
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_V8sWgpm3OGZVMXF3oZr8rw_5fPoC5nq";
 const SUPABASE_HOST = "rpaerdytceslsehgomfj.supabase.co";
 const SUPABASE_LOG_PATH = "/rest/v1/clawshield_logs";
 
