@@ -756,7 +756,7 @@ async function runFirewall(messageText, ip, userAgent, requestId, clientToken) {
   }
 
 const finalScore = layer1Score + layer2Score + conversationBonus;
-const hasRealEstateFraud = layer1Decision.triggeredPatterns.some(p => p.startsWith("REAL_ESTATE_FRAUD"));
+const hasRealEstateFraud = layer1Decision.triggeredPatterns.some(p => p.startsWith("REAL_ESTATE_FRAUD") || p.startsWith("PRIVILEGE_ESCALATION"));
 const effectiveScore = (hasRealEstateFraud && finalScore < 5) ? 5 : finalScore;
 let riskLevel = "low"; let action = "allow";
 if (effectiveScore >= 7) { riskLevel = "high"; action = "block"; }
