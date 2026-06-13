@@ -755,12 +755,14 @@ async function runFirewall(messageText, ip, userAgent, requestId, clientToken) {
     }
   }
 
-  const finalScore = layer1Score + layer2Score + conversationBonus;
-  let riskLevel = "low"; let action = "allow";
-  if (finalScore >= 7) { riskLevel = "high"; action = "block"; }
-  else if (finalScore >= 5) { riskLevel = "medium"; action = "review"; }
+const finalScore = layer1Score + layer2Score + conversationBonus;
+const hasRealEstateFraud = layer1Decision.triggeredPatterns.some(p => p.startsWith("REAL_ESTATE_FRAUD"));
+const effectiveScore = (hasRealEstateFraud && finalScore < 5) ? 5 : finalScore;
+let riskLevel = "low"; let action = "allow";
+if (effectiveScore >= 7) { riskLevel = "high"; action = "block"; }
+else if (effectiveScore >= 5) { riskLevel = "medium"; action = "review"; }
 
-  const decision = { riskScore: finalScore, riskLevel, action,
+  const decision = { riskScore: effectiveScore, riskLevel, action,
     triggeredPatterns: layer1Decision.triggeredPatterns, proximityMatches: layer1Decision.proximityMatches };
   const session = updateSession(ip, normalizedInput, decision.action);
   const durationMs = Date.now() - start;
@@ -769,7 +771,7 @@ async function runFirewall(messageText, ip, userAgent, requestId, clientToken) {
     rawInput: normalized.original, normalizedInput, inputLength: messageText.length,
     action: decision.action, riskLevel: decision.riskLevel,
     triggeredPatterns: decision.triggeredPatterns, proximityMatches: decision.proximityMatches,
-    layer1Score, layer2Score, conversationBonus, finalScore, intentAnalysis,
+    layer1Score, layer2Score, conversationBonus, finalScore: effectiveScore, intentAnalysis,
     conversationState: buildConversationState(memory), repeatCount,
     sessionRequestCount: session.requestCount, sessionBlockedCount: session.blockedCount, durationMs };
 
