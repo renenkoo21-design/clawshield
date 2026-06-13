@@ -295,7 +295,7 @@ const REAL_ESTATE_PATTERNS = [
   // Gap #6 fix: financial institution reconnaissance
   /(what|which).{0,30}(bank|account|institution|routing|escrow).{0,30}(use|using|hold|holds)/i,
   // Gap #4 fix: approve + financial directive
-  /approve.{0,40}(account|change|update|transfer)/i
+  /approve.{0,40}(account|change|update|transfer)/i,
  /(change|update|modify)[\s\S]{0,30}(buyer|seller|client)[\s\S]{0,30}(contact|email|info|record)/i,
 ];
 
