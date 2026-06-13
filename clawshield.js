@@ -296,6 +296,7 @@ const REAL_ESTATE_PATTERNS = [
   /(what|which).{0,30}(bank|account|institution|routing|escrow).{0,30}(use|using|hold|holds)/i,
   // Gap #4 fix: approve + financial directive
   /approve.{0,40}(account|change|update|transfer)/i
+  /(change|update|modify).{0,30}(buyer|seller|client).{0,30}(contact|email|info|record)/i,
 ];
 
 const ENCODING_OBFUSCATION_PATTERNS = [
