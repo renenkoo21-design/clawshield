@@ -16,14 +16,14 @@ const https = require("https");
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const GROQ_HOST = "api.groq.com";
 const GROQ_PATH = "/openai/v1/chat/completions";
 
 // ✅ SUPABASE CREDENTIALS
-const SUPABASE_URL = process.env.SUPABASE_URL || "https://rpaerdytceslsehgomfj.supabase.co";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_V8sWgpm3OGZVMXF3oZr8rw_5fPoC5nq";
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const SUPABASE_HOST = "rpaerdytceslsehgomfj.supabase.co";
 const SUPABASE_LOG_PATH = "/rest/v1/clawshield_logs";
 
