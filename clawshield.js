@@ -16,7 +16,7 @@ const https = require("https");
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const GROQ_HOST = "api.groq.com";
 const GROQ_PATH = "/openai/v1/chat/completions";
