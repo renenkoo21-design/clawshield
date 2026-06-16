@@ -1262,7 +1262,6 @@ setInterval(() => {
 
 function showPasswordResetForm(accessToken) {
   document.getElementById('loginScreen').innerHTML = `
-  document.getElementById('savePasswordBtn').onclick = () => saveNewPassword(accessToken);
     <div class="login-card">
       <div class="login-logo">
         <svg class="shield" viewBox="0 0 56 56" fill="none">
@@ -1285,6 +1284,7 @@ function showPasswordResetForm(accessToken) {
       </button>
       <div class="login-error" id="resetError"></div>
     </div>`;
+  document.getElementById('savePasswordBtn').onclick = () => saveNewPassword(accessToken);
 }
 
 async function saveNewPassword(accessToken) {
