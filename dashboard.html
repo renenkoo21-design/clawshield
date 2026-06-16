@@ -1262,6 +1262,7 @@ setInterval(() => {
 
 function showPasswordResetForm(accessToken) {
   document.getElementById('loginScreen').innerHTML = `
+  document.getElementById('savePasswordBtn').onclick = () => saveNewPassword(accessToken);
     <div class="login-card">
       <div class="login-logo">
         <svg class="shield" viewBox="0 0 56 56" fill="none">
@@ -1279,7 +1280,7 @@ function showPasswordResetForm(accessToken) {
         <label>Confirm Password</label>
         <input type="password" id="confirmPassword" placeholder="Confirm new password" />
       </div>
-      <button class="login-btn" onclick="saveNewPassword('${accessToken}')">
+      <button class="login-btn" id="savePasswordBtn">
         <span>Save New Password</span>
       </button>
       <div class="login-error" id="resetError"></div>
