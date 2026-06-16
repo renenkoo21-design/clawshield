@@ -1245,10 +1245,65 @@ setInterval(() => {
 
 // ════ BOOT ════
 (function init() {
+  // Handle password reset token in URL
+  const hash = window.location.hash;
+  if (hash.includes('access_token') && hash.includes('type=recovery')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get('access_token');
+    showPasswordResetForm(accessToken);
+    return;
+  }
   const saved = loadSession();
   if (saved?.access_token && saved?.user) {
     supabaseSession = saved;
     enterDashboard(saved);
+  }
+})();
+
+function showPasswordResetForm(accessToken) {
+  document.getElementById('loginScreen').innerHTML = `
+    <div class="login-card">
+      <div class="login-logo">
+        <svg class="shield" viewBox="0 0 56 56" fill="none">
+          <path d="M28 4L8 14V28C8 39.05 16.95 50.3 28 53C39.05 50.3 48 39.05 48 28V14L28 4Z" fill="rgba(0,245,160,0.07)" stroke="#00f5a0" stroke-width="1.5"/>
+          <path d="M19 28L25 34L37 22" stroke="#00f5a0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="wordmark">CLAW<span>SHIELD</span></div>
+        <div class="sub">Set New Password</div>
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" id="newPassword" placeholder="Enter new password" />
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm new password" />
+      </div>
+      <button class="login-btn" onclick="saveNewPassword('${accessToken}')">
+        <span>Save New Password</span>
+      </button>
+      <div class="login-error" id="resetError"></div>
+    </div>`;
+}
+
+async function saveNewPassword(accessToken) {
+  const p1 = document.getElementById('newPassword').value;
+  const p2 = document.getElementById('confirmPassword').value;
+  const err = document.getElementById('resetError');
+  if (!p1 || p1.length < 6) { err.textContent = '⚠ Password must be at least 6 characters.'; err.style.display='block'; return; }
+  if (p1 !== p2) { err.textContent = '⚠ Passwords do not match.'; err.style.display='block'; return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}` },
+      body: JSON.stringify({ password: p1 })
+    });
+    if (!res.ok) throw await res.json();
+    window.location.hash = '';
+    window.location.href = '/dashboard.html';
+  } catch(e) {
+    err.textContent = '⚠ Failed to update password. Try resetting again.';
+    err.style.display = 'block';
   }
 })();
 </script>
