@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClawShield — Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:       #050508;
@@ -11,10 +18,8 @@
   --muted:    #5a5a72;
   --dim:      #2a2a3e;
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
-
 body {
   background: var(--bg);
   color: var(--text);
@@ -23,7 +28,6 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
-
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -33,21 +37,14 @@ body::before {
   background-size: 48px 48px;
   pointer-events: none; z-index: 0;
 }
-
-/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
-
-/* ════════════════════════════════
-   LOGIN SCREEN
-════════════════════════════════ */
 #loginScreen {
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: center; justify-content: center;
   padding: 24px;
 }
-
 .login-card {
   position: relative; z-index: 1;
   width: 100%; max-width: 420px;
@@ -57,55 +54,35 @@ body::before {
   padding: 48px 40px;
   animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
 }
-
 .login-card::before {
   content: '';
   position: absolute; top: -1px; left: 10%; right: 10%; height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
 }
-
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(32px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
-.login-logo {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.login-logo .shield {
-  width: 56px; height: 56px;
-  margin: 0 auto 16px;
-  display: block;
-}
-
+.login-logo { text-align: center; margin-bottom: 40px; }
+.login-logo .shield { width: 56px; height: 56px; margin: 0 auto 16px; display: block; }
 .login-logo .wordmark {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 32px; font-weight: 900;
-  letter-spacing: 4px;
-  color: var(--text);
+  letter-spacing: 4px; color: var(--text);
 }
-
 .login-logo .wordmark span { color: var(--accent); }
-
 .login-logo .sub {
   font-size: 11px; font-weight: 600;
   letter-spacing: 4px; text-transform: uppercase;
   color: var(--muted); margin-top: 6px;
 }
-
-.field {
-  margin-bottom: 16px;
-}
-
+.field { margin-bottom: 16px; }
 .field label {
   display: block;
   font-size: 10px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase;
   color: var(--muted); margin-bottom: 8px;
 }
-
 .field input {
   width: 100%;
   background: var(--bg);
@@ -119,14 +96,11 @@ body::before {
   transition: border-color 0.2s, box-shadow 0.2s;
   -webkit-appearance: none;
 }
-
 .field input:focus {
   border-color: rgba(0,245,160,0.4);
   box-shadow: 0 0 0 3px rgba(0,245,160,0.08);
 }
-
 .field input::placeholder { color: var(--muted); }
-
 .login-btn {
   width: 100%; margin-top: 8px;
   background: var(--accent);
@@ -141,11 +115,9 @@ body::before {
   min-height: 52px;
   display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-
 .login-btn:hover { background: #00ffaa; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,245,160,0.3); }
 .login-btn:active { transform: translateY(0); }
 .login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
 .login-error {
   margin-top: 14px;
   background: rgba(255,60,60,0.08);
@@ -155,7 +127,6 @@ body::before {
   font-size: 13px; color: var(--danger);
   display: none;
 }
-
 .login-spinner {
   width: 16px; height: 16px;
   border: 2px solid rgba(0,0,0,0.3);
@@ -164,519 +135,173 @@ body::before {
   animation: spin 0.7s linear infinite;
   display: none;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ════════════════════════════════
-   DASHBOARD
-════════════════════════════════ */
 #dashboard { display: none; min-height: 100vh; }
-
-/* ── TOPBAR ── */
 .topbar {
   position: sticky; top: 0; z-index: 50;
   background: rgba(5,5,8,0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
-  padding: 0 32px;
-  height: 64px;
+  padding: 0 32px; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
 }
-
 .topbar-left { display: flex; align-items: center; gap: 20px; }
-
-.topbar-logo {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 22px; font-weight: 900;
-  letter-spacing: 3px;
-}
+.topbar-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 3px; }
 .topbar-logo span { color: var(--accent); }
-
 .status-pill {
   display: flex; align-items: center; gap: 7px;
   background: rgba(0,245,160,0.08);
   border: 1px solid rgba(0,245,160,0.15);
-  border-radius: 100px;
-  padding: 5px 12px;
+  border-radius: 100px; padding: 5px 12px;
   font-size: 10px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase;
   color: var(--accent);
 }
-
 .status-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--accent);
   animation: pulse 1.5s ease-in-out infinite;
 }
-
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
-
 .topbar-right { display: flex; align-items: center; gap: 12px; }
-
 .user-chip {
   display: flex; align-items: center; gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  padding: 6px 14px 6px 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 100px; padding: 6px 14px 6px 8px;
   font-size: 12px; color: var(--muted);
 }
-
 .user-avatar {
   width: 26px; height: 26px; border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), #00a8ff);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #000;
-  flex-shrink: 0;
+  font-size: 11px; font-weight: 700; color: #000; flex-shrink: 0;
 }
-
 .logout-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--muted);
-  font-family: 'Barlow', sans-serif;
-  font-size: 12px; font-weight: 600;
-  padding: 7px 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.5px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted);
+  font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600;
+  padding: 7px 14px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
 }
 .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
-
-/* ── MAIN CONTENT ── */
-.main {
-  position: relative; z-index: 1;
-  max-width: 1280px; margin: 0 auto;
-  padding: 40px 32px 80px;
-}
-
-/* ── HERO STATS ── */
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 40px;
-  animation: fadeUp 0.6s ease 0.1s both;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
+.main { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 40px 32px 80px; }
+.hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; animation: fadeUp 0.6s ease 0.1s both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 .stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px;
   position: relative; overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
-  cursor: default;
+  transition: border-color 0.2s, transform 0.2s; cursor: default;
 }
-
 .stat-card:hover { transform: translateY(-2px); }
 .stat-card.total:hover  { border-color: rgba(90,90,114,0.4); }
 .stat-card.safe:hover   { border-color: rgba(0,245,160,0.3); }
 .stat-card.flagged:hover { border-color: rgba(255,184,0,0.3); }
 .stat-card.blocked:hover { border-color: rgba(255,60,60,0.3); }
-
-.stat-card::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-}
+.stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
 .stat-card.safe::after   { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
 .stat-card.flagged::after { background: linear-gradient(90deg, transparent, var(--warning), transparent); }
 .stat-card.blocked::after { background: linear-gradient(90deg, transparent, var(--danger), transparent); }
-
-.stat-icon {
-  font-size: 22px; margin-bottom: 12px;
-  display: block;
-}
-
-.stat-num {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 36px; line-height: 1;
-  margin-bottom: 6px;
-  font-weight: 400;
-}
-
+.stat-icon { font-size: 22px; margin-bottom: 12px; display: block; }
+.stat-num { font-family: 'Share Tech Mono', monospace; font-size: 36px; line-height: 1; margin-bottom: 6px; font-weight: 400; }
 .stat-card.total  .stat-num { color: var(--text); }
 .stat-card.safe   .stat-num { color: var(--accent); }
 .stat-card.flagged .stat-num { color: var(--warning); }
 .stat-card.blocked .stat-num { color: var(--danger); }
-
-.stat-label {
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--muted);
-}
-
-.stat-sub {
-  font-size: 11px; color: var(--muted);
-  margin-top: 4px;
-}
-
-/* ── CONTROLS BAR ── */
-.controls {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 20px;
-  animation: fadeUp 0.6s ease 0.2s both;
-  flex-wrap: wrap;
-}
-
+.stat-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.controls { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; animation: fadeUp 0.6s ease 0.2s both; flex-wrap: wrap; }
 .filter-group { display: flex; gap: 6px; }
-
 .filter-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--muted);
-  font-family: 'Barlow', sans-serif;
-  font-size: 12px; font-weight: 600;
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: all 0.15s;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted);
+  font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600;
+  padding: 8px 14px; cursor: pointer; transition: all 0.15s;
+  letter-spacing: 0.5px; white-space: nowrap;
 }
-
 .filter-btn:hover { border-color: rgba(0,245,160,0.2); color: var(--text); }
-
-.filter-btn.active {
-  background: rgba(0,245,160,0.1);
-  border-color: rgba(0,245,160,0.3);
-  color: var(--accent);
-}
-
-.filter-btn.active.danger {
-  background: rgba(255,60,60,0.1);
-  border-color: rgba(255,60,60,0.3);
-  color: var(--danger);
-}
-
-.filter-btn.active.warning {
-  background: rgba(255,184,0,0.1);
-  border-color: rgba(255,184,0,0.3);
-  color: var(--warning);
-}
-
+.filter-btn.active { background: rgba(0,245,160,0.1); border-color: rgba(0,245,160,0.3); color: var(--accent); }
+.filter-btn.active.danger { background: rgba(255,60,60,0.1); border-color: rgba(255,60,60,0.3); color: var(--danger); }
+.filter-btn.active.warning { background: rgba(255,184,0,0.1); border-color: rgba(255,184,0,0.3); color: var(--warning); }
 .refresh-btn {
-  margin-left: auto;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--muted);
-  font-family: 'Barlow', sans-serif;
-  font-size: 12px; font-weight: 600;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex; align-items: center; gap: 8px;
+  margin-left: auto; background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted); font-family: 'Barlow', sans-serif;
+  font-size: 12px; font-weight: 600; padding: 8px 16px; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; gap: 8px;
 }
 .refresh-btn:hover { border-color: rgba(0,245,160,0.3); color: var(--accent); }
 .refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
-
-/* ── LOG TABLE ── */
-.log-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  animation: fadeUp 0.6s ease 0.3s both;
-}
-
-.log-header {
-  display: grid;
-  grid-template-columns: 140px 1fr 100px 80px 160px;
-  gap: 0;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface2);
-}
-
-.log-header-cell {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--muted);
-}
-
+.log-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; animation: fadeUp 0.6s ease 0.3s both; }
+.log-header { display: grid; grid-template-columns: 140px 1fr 100px 80px 160px; gap: 0; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.log-header-cell { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
 .log-list { min-height: 300px; }
-
 .log-row {
-  display: grid;
-  grid-template-columns: 140px 1fr 100px 80px 160px;
-  gap: 0;
-  padding: 0 20px;
-  border-bottom: 1px solid rgba(26,26,46,0.6);
-  cursor: pointer;
-  transition: background 0.15s;
-  align-items: center;
-  min-height: 56px;
-  animation: rowIn 0.3s ease both;
+  display: grid; grid-template-columns: 140px 1fr 100px 80px 160px;
+  gap: 0; padding: 0 20px; border-bottom: 1px solid rgba(26,26,46,0.6);
+  cursor: pointer; transition: background 0.15s; align-items: center;
+  min-height: 56px; animation: rowIn 0.3s ease both;
 }
-
-@keyframes rowIn {
-  from { opacity: 0; transform: translateX(-8px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
+@keyframes rowIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
 .log-row:last-child { border-bottom: none; }
 .log-row:hover { background: rgba(255,255,255,0.025); }
-
 .log-cell { padding: 14px 8px 14px 0; font-size: 13px; }
-
-.log-time {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px; color: var(--muted);
-  white-space: nowrap;
-}
-
-.log-msg {
-  color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 100%;
-  font-size: 13px;
-}
-
-.decision-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px; font-weight: 700; letter-spacing: 1px;
-  padding: 4px 10px; border-radius: 6px;
-  white-space: nowrap;
-}
-
+.log-time { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.log-msg { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 13px; }
+.decision-badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
 .badge-allow  { background: rgba(0,245,160,0.1);  color: var(--accent);  border: 1px solid rgba(0,245,160,0.2); }
 .badge-review { background: rgba(255,184,0,0.1);  color: var(--warning); border: 1px solid rgba(255,184,0,0.2); }
 .badge-block  { background: rgba(255,60,60,0.1);  color: var(--danger);  border: 1px solid rgba(255,60,60,0.2); }
-
-.log-score {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 14px; font-weight: 600;
-}
-
+.log-score { font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: 600; }
 .score-low  { color: var(--accent); }
 .score-med  { color: var(--warning); }
 .score-high { color: var(--danger); }
-
-.log-category {
-  font-size: 11px; color: var(--muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-/* ── EMPTY / LOADING ── */
-.log-empty {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 80px 24px;
-  color: var(--muted);
-  text-align: center;
-}
-
+.log-category { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; color: var(--muted); text-align: center; }
 .log-empty .icon { font-size: 40px; margin-bottom: 16px; opacity: 0.4; }
 .log-empty .title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
 .log-empty .sub { font-size: 13px; line-height: 1.6; }
-
-.log-loading {
-  display: flex; align-items: center; justify-content: center;
-  padding: 80px 24px; gap: 12px; color: var(--muted);
-}
-
-.big-spinner {
-  width: 24px; height: 24px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-/* ── DETAIL DRAWER ── */
+.log-loading { display: flex; align-items: center; justify-content: center; padding: 80px 24px; gap: 12px; color: var(--muted); }
+.big-spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 #drawer {
   position: fixed; top: 0; right: 0; bottom: 0;
   width: 480px; max-width: 100vw;
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  z-index: 200;
-  transform: translateX(100%);
+  background: var(--surface); border-left: 1px solid var(--border);
+  z-index: 200; transform: translateX(100%);
   transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
-  overflow-y: auto;
-  display: flex; flex-direction: column;
+  overflow-y: auto; display: flex; flex-direction: column;
 }
-
 #drawer.open { transform: translateX(0); }
-
-#drawerOverlay {
-  position: fixed; inset: 0; z-index: 199;
-  background: rgba(0,0,0,0.5);
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s;
-}
+#drawerOverlay { position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 #drawerOverlay.open { opacity: 1; pointer-events: all; }
-
-.drawer-top {
-  padding: 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 16px; flex-shrink: 0;
-  position: sticky; top: 0; background: var(--surface);
-  z-index: 1;
-}
-
-.drawer-verdict {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 26px; font-weight: 700; letter-spacing: 2px;
-}
-
-.drawer-close {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--muted);
-  width: 36px; height: 36px;
-  cursor: pointer; font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s; flex-shrink: 0;
-}
+.drawer-top { padding: 24px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-shrink: 0; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.drawer-verdict { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 2px; }
+.drawer-close { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); width: 36px; height: 36px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
 .drawer-close:hover { border-color: var(--danger); color: var(--danger); }
-
 .drawer-body { padding: 24px; flex: 1; }
-
 .drawer-section { margin-bottom: 28px; }
-
-.drawer-label {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 10px;
-}
-
-.drawer-message {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
-  font-size: 14px; line-height: 1.6;
-  color: var(--text);
-  word-break: break-word;
-}
-
-.drawer-meta {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.meta-chip {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-}
-
-.meta-chip .key {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 5px;
-}
-
-.meta-chip .val {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 13px; color: var(--text);
-}
-
+.drawer-label { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.drawer-message { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-size: 14px; line-height: 1.6; color: var(--text); word-break: break-word; }
+.drawer-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.meta-chip { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.meta-chip .key { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.meta-chip .val { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text); }
 .evidence-list { display: flex; flex-direction: column; gap: 8px; }
-
-.evidence-item {
-  display: flex; align-items: flex-start; gap: 10px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 12px; color: var(--muted); line-height: 1.5;
-}
-
-.evidence-item::before {
-  content: '→';
-  color: var(--accent); font-weight: 700;
-  flex-shrink: 0; margin-top: 1px;
-}
-
+.evidence-item { display: flex; align-items: flex-start; gap: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.evidence-item::before { content: '→'; color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 .pattern-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.ptag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  background: rgba(255,60,60,0.08);
-  border: 1px solid rgba(255,60,60,0.15);
-  color: var(--danger);
-  padding: 4px 8px; border-radius: 4px;
-}
-
-.ptag.green {
-  background: rgba(0,245,160,0.08);
-  border-color: rgba(0,245,160,0.15);
-  color: var(--accent);
-}
-
-/* ── TOAST ── */
-#toast {
-  position: fixed; bottom: 32px; left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 20px;
-  font-size: 13px; color: var(--text);
-  z-index: 999;
-  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
-  opacity: 0; pointer-events: none;
-  white-space: nowrap;
-}
+.ptag { font-family: 'Share Tech Mono', monospace; font-size: 10px; background: rgba(255,60,60,0.08); border: 1px solid rgba(255,60,60,0.15); color: var(--danger); padding: 4px 8px; border-radius: 4px; }
+.ptag.green { background: rgba(0,245,160,0.08); border-color: rgba(0,245,160,0.15); color: var(--accent); }
+#toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 999; transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s; opacity: 0; pointer-events: none; white-space: nowrap; }
 #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-/* ── THREAT TICKER ── */
-.threat-ticker {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 20px;
-  margin-bottom: 24px;
-  display: flex; align-items: center; gap: 12px;
-  font-size: 12px; color: var(--muted);
-  overflow: hidden;
-  animation: fadeUp 0.6s ease 0.15s both;
-}
-
-.ticker-label {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--muted); white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.ticker-track {
-  flex: 1; overflow: hidden;
-  height: 20px; position: relative;
-}
-
-.ticker-inner {
-  display: flex; gap: 40px;
-  animation: ticker 20s linear infinite;
-  white-space: nowrap;
-  position: absolute;
-}
-
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
+.threat-ticker { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--muted); overflow: hidden; animation: fadeUp 0.6s ease 0.15s both; }
+.ticker-label { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.ticker-track { flex: 1; overflow: hidden; height: 20px; position: relative; }
+.ticker-inner { display: flex; gap: 40px; animation: ticker 20s linear infinite; white-space: nowrap; position: absolute; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .ticker-item { color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 11px; }
 .ticker-item.red { color: var(--danger); }
 .ticker-item.yellow { color: var(--warning); }
 .ticker-item.green { color: var(--accent); }
-
-/* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .topbar { padding: 0 16px; }
   .main { padding: 24px 16px 60px; }
@@ -689,8 +314,9 @@ body::before {
   .status-pill { display: none; }
 }
 </style>
+</head>
+<body>
 
-<!-- ════ LOGIN ════ -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
@@ -701,17 +327,14 @@ body::before {
       <div class="wordmark">CLAW<span>SHIELD</span></div>
       <div class="sub">Command Center</div>
     </div>
-
     <div class="field">
       <label for="emailInput">Email</label>
       <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
     </div>
-
     <div class="field">
       <label for="passwordInput">Password</label>
       <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password">
     </div>
-
     <button class="login-btn" id="loginBtn" onclick="doLogin()">
       <svg id="loginBtnIcon" viewBox="0 0 16 16" fill="none" width="16" height="16">
         <path d="M8 1L14 4V8C14 11.31 11.31 14.42 8 15C4.69 14.42 2 11.31 2 8V4L8 1Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
@@ -720,14 +343,11 @@ body::before {
       <div class="login-spinner" id="loginSpinner"></div>
       <span id="loginBtnText">Access Command Center</span>
     </button>
-
     <div class="login-error" id="loginError"></div>
   </div>
 </div>
 
-<!-- ════ DASHBOARD ════ -->
 <div id="dashboard">
-
   <div class="topbar">
     <div class="topbar-left">
       <div class="topbar-logo">CLAW<span>SHIELD</span></div>
@@ -744,10 +364,7 @@ body::before {
       <button class="logout-btn" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
-
   <div class="main">
-
-    <!-- Stats -->
     <div class="hero-stats" id="heroStats">
       <div class="stat-card total">
         <span class="stat-icon">🛡️</span>
@@ -774,16 +391,12 @@ body::before {
         <div class="stat-sub">AI never saw these</div>
       </div>
     </div>
-
-    <!-- Ticker -->
     <div class="threat-ticker" id="threatTicker" style="display:none">
       <div class="ticker-label">Live Intel</div>
       <div class="ticker-track">
         <div class="ticker-inner" id="tickerInner"></div>
       </div>
     </div>
-
-    <!-- Controls -->
     <div class="controls">
       <div class="filter-group">
         <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">All</button>
@@ -798,8 +411,6 @@ body::before {
         Refresh
       </button>
     </div>
-
-    <!-- Log Table -->
     <div class="log-wrap">
       <div class="log-header">
         <div class="log-header-cell">Time</div>
@@ -815,11 +426,9 @@ body::before {
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- Detail Drawer -->
 <div id="drawerOverlay" onclick="closeDrawer()"></div>
 <div id="drawer">
   <div class="drawer-top">
@@ -832,39 +441,20 @@ body::before {
   <div class="drawer-body" id="drawerBody"></div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
 <script>
-const SUPABASE_URL  = "https://rpaerdytceslsehgomfj.supabase.co";
-const SUPABASE_KEY  = "sb_publishable_V8sWgpm3OGZVMXF3oZr8rw_5fPoC5nq";
-const LOG_TABLE     = "clawshield_logs";
-const CLIENT_TOKEN  = "default";
+const SUPABASE_URL = "https://rpaerdytceslsehgomfj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_V8sWgpm3OGZVMXF3oZr8rw_5fPoC5nq";
+const LOG_TABLE    = "clawshield_logs";
+const CLIENT_TOKEN = "default";
 
-let currentFilter = 'all';
-let allLogs = [];
+let currentFilter  = 'all';
+let allLogs        = [];
 let supabaseSession = null;
 
-// ════ SUPABASE AUTH HELPERS ════
-
-async function sbRequest(path, method = 'GET', body = null, authToken = null) {
-  const headers = {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_KEY,
-  };
-  if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-  else headers['Authorization'] = `Bearer ${SUPABASE_KEY}`;
-
-  const opts = { method, headers };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(SUPABASE_URL + path, opts);
-  const data = await res.json();
-  if (!res.ok) throw data;
-  return data;
-}
-
 async function signIn(email, password) {
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+  const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
     body: JSON.stringify({ email, password })
@@ -874,46 +464,34 @@ async function signIn(email, password) {
   return data;
 }
 
-async function signOut(accessToken) {
-  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+async function signOut(token) {
+  await fetch(SUPABASE_URL + '/auth/v1/logout', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}` }
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
   });
 }
 
-async function fetchLogs(accessToken) {
-  const url = `${SUPABASE_URL}/rest/v1/${LOG_TABLE}?client_token=eq.${CLIENT_TOKEN}&order=created_at.desc&limit=100`;
+async function fetchLogs(token) {
+  const url = SUPABASE_URL + '/rest/v1/' + LOG_TABLE + '?client_token=eq.' + CLIENT_TOKEN + '&order=created_at.desc&limit=100';
   const res = await fetch(url, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
   });
   if (!res.ok) throw await res.json();
   return await res.json();
 }
 
-// ════ SESSION PERSISTENCE ════
-
-function saveSession(session) {
-  try { localStorage.setItem('cs_session', JSON.stringify(session)); } catch(e) {}
-}
-
-function loadSession() {
-  try { return JSON.parse(localStorage.getItem('cs_session')); } catch(e) { return null; }
-}
-
-function clearSession() {
-  try { localStorage.removeItem('cs_session'); } catch(e) {}
-}
-
-// ════ LOGIN ════
+function saveSession(s) { try { localStorage.setItem('cs_session', JSON.stringify(s)); } catch(e) {} }
+function loadSession()  { try { return JSON.parse(localStorage.getItem('cs_session')); } catch(e) { return null; } }
+function clearSession() { try { localStorage.removeItem('cs_session'); } catch(e) {} }
 
 async function doLogin() {
-  const email = document.getElementById('emailInput').value.trim();
+  const email    = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passwordInput').value;
-  const errorEl = document.getElementById('loginError');
-  const btn = document.getElementById('loginBtn');
-  const spinner = document.getElementById('loginSpinner');
-  const icon = document.getElementById('loginBtnIcon');
-  const txt = document.getElementById('loginBtnText');
+  const errorEl  = document.getElementById('loginError');
+  const btn      = document.getElementById('loginBtn');
+  const spinner  = document.getElementById('loginSpinner');
+  const icon     = document.getElementById('loginBtnIcon');
+  const txt      = document.getElementById('loginBtnText');
 
   errorEl.style.display = 'none';
   if (!email || !password) { showLoginError('Enter your email and password.'); return; }
@@ -929,8 +507,7 @@ async function doLogin() {
     saveSession(session);
     enterDashboard(session);
   } catch(err) {
-    const msg = err.error_description || err.message || 'Authentication failed.';
-    showLoginError(msg);
+    showLoginError(err.error_description || err.message || 'Authentication failed.');
   } finally {
     btn.disabled = false;
     icon.style.display = 'block';
@@ -945,25 +522,21 @@ function showLoginError(msg) {
   el.style.display = 'block';
 }
 
-document.getElementById('passwordInput').addEventListener('keydown', e => {
+document.getElementById('passwordInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') doLogin();
 });
-
-// ════ ENTER DASHBOARD ════
 
 function enterDashboard(session) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
-
-  const email = session.user?.email || '—';
+  const email = (session.user && session.user.email) ? session.user.email : '—';
   document.getElementById('userEmail').textContent = email;
   document.getElementById('userAvatar').textContent = email[0].toUpperCase();
-
   loadLogs(session.access_token);
 }
 
 async function doLogout() {
-  if (supabaseSession?.access_token) {
+  if (supabaseSession && supabaseSession.access_token) {
     try { await signOut(supabaseSession.access_token); } catch(e) {}
   }
   supabaseSession = null;
@@ -973,11 +546,8 @@ async function doLogout() {
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('emailInput').value = '';
   document.getElementById('passwordInput').value = '';
-  document.getElementById('logList').innerHTML = '<div class="log-loading"><div class="big-spinner"></div><span>Loading your security logs...</span></div>';
   showToast('Signed out.');
 }
-
-// ════ LOAD LOGS ════
 
 async function loadLogs(token) {
   try {
@@ -987,12 +557,7 @@ async function loadLogs(token) {
     renderTicker(logs);
     renderLogs(logs);
   } catch(err) {
-    document.getElementById('logList').innerHTML = `
-      <div class="log-empty">
-        <div class="icon">⚡</div>
-        <div class="title">Could not load logs</div>
-        <div class="sub">Check your connection and refresh.</div>
-      </div>`;
+    document.getElementById('logList').innerHTML = '<div class="log-empty"><div class="icon">⚡</div><div class="title">Could not load logs</div><div class="sub">Check your connection and refresh.</div></div>';
   }
 }
 
@@ -1005,18 +570,11 @@ async function refreshLogs() {
   showToast('Logs refreshed.');
 }
 
-// ════ STATS ════
-
 function renderStats(logs) {
-  const total   = logs.length;
-  const allowed = logs.filter(l => l.action === 'allow').length;
-  const flagged = logs.filter(l => l.action === 'review').length;
-  const blocked = logs.filter(l => l.action === 'block').length;
-
-  animateCount('statTotal',   total);
-  animateCount('statAllowed', allowed);
-  animateCount('statFlagged', flagged);
-  animateCount('statBlocked', blocked);
+  animateCount('statTotal',   logs.length);
+  animateCount('statAllowed', logs.filter(function(l) { return l.action === 'allow'; }).length);
+  animateCount('statFlagged', logs.filter(function(l) { return l.action === 'review'; }).length);
+  animateCount('statBlocked', logs.filter(function(l) { return l.action === 'block'; }).length);
 }
 
 function animateCount(id, target) {
@@ -1035,184 +593,96 @@ function animateCount(id, target) {
   requestAnimationFrame(step);
 }
 
-// ════ TICKER ════
-
 function renderTicker(logs) {
   if (!logs.length) return;
   const ticker = document.getElementById('threatTicker');
-  const inner = document.getElementById('tickerInner');
+  const inner  = document.getElementById('tickerInner');
   ticker.style.display = 'flex';
-
-  const items = logs.slice(0, 20).map(l => {
-    const cls = l.action === 'block' ? 'red' : l.action === 'review' ? 'yellow' : 'green';
+  const items = logs.slice(0, 20).map(function(l) {
+    const cls  = l.action === 'block' ? 'red' : l.action === 'review' ? 'yellow' : 'green';
     const icon = l.action === 'block' ? '🚫' : l.action === 'review' ? '⚠' : '✓';
-    const msg = (l.raw_input || '').slice(0, 40) + '...';
-    return `<span class="ticker-item ${cls}">${icon} ${msg}</span>`;
+    const msg  = (l.raw_input || '').slice(0, 40) + '...';
+    return '<span class="ticker-item ' + cls + '">' + icon + ' ' + msg + '</span>';
   }).join('');
-
-  // Double it for seamless loop
   inner.innerHTML = items + items;
 }
 
-// ════ FILTER & RENDER LOGS ════
-
 function setFilter(f) {
   currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'danger', 'warning'));
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active', 'danger', 'warning'); });
   const btn = document.getElementById('filter' + f.charAt(0).toUpperCase() + f.slice(1));
   if (btn) {
     btn.classList.add('active');
-    if (f === 'block') btn.classList.add('danger');
+    if (f === 'block')  btn.classList.add('danger');
     if (f === 'review') btn.classList.add('warning');
   }
   renderLogs(allLogs);
 }
 
 function renderLogs(logs) {
-  const filtered = currentFilter === 'all' ? logs : logs.filter(l => l.action === currentFilter);
+  const filtered = currentFilter === 'all' ? logs : logs.filter(function(l) { return l.action === currentFilter; });
   const list = document.getElementById('logList');
-
   if (!filtered.length) {
-    list.innerHTML = `
-      <div class="log-empty">
-        <div class="icon">${currentFilter === 'block' ? '🚫' : currentFilter === 'review' ? '⚠️' : '🛡️'}</div>
-        <div class="title">No ${currentFilter === 'all' ? '' : currentFilter + 'ed'} messages yet</div>
-        <div class="sub">Messages will appear here as ClawShield scans them.<br>Your firewall is active and watching.</div>
-      </div>`;
+    list.innerHTML = '<div class="log-empty"><div class="icon">' + (currentFilter === 'block' ? '🚫' : currentFilter === 'review' ? '⚠️' : '🛡️') + '</div><div class="title">No messages yet</div><div class="sub">Messages will appear here as ClawShield scans them.</div></div>';
+    list._filtered = filtered;
     return;
   }
-
-  list.innerHTML = filtered.map((log, i) => {
-    const time = new Date(log.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-    const msg = (log.raw_input || '').replace(/</g,'&lt;');
+  list.innerHTML = filtered.map(function(log, i) {
+    const time  = new Date(log.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+    const msg   = (log.raw_input || '').replace(/</g, '&lt;');
     const badge = log.action === 'block'  ? '<span class="decision-badge badge-block">🚫 BLOCKED</span>'
                 : log.action === 'review' ? '<span class="decision-badge badge-review">⚠ FLAGGED</span>'
                 :                           '<span class="decision-badge badge-allow">✓ ALLOWED</span>';
-    const score = log.final_score || 0;
+    const score    = log.final_score || 0;
     const scoreCls = score >= 7 ? 'score-high' : score >= 5 ? 'score-med' : 'score-low';
-    const cat = log.intent_category || '—';
-    return `
-      <div class="log-row" onclick="openDrawer(${i})" style="animation-delay:${Math.min(i*0.03, 0.3)}s">
-        <div class="log-cell log-time">${time}</div>
-        <div class="log-cell log-msg">${msg}</div>
-        <div class="log-cell">${badge}</div>
-        <div class="log-cell log-score ${scoreCls}">${score}</div>
-        <div class="log-cell log-category">${cat}</div>
-      </div>`;
+    const cat      = log.intent_category || '—';
+    const delay    = Math.min(i * 0.03, 0.3);
+    return '<div class="log-row" onclick="openDrawer(' + i + ')" style="animation-delay:' + delay + 's"><div class="log-cell log-time">' + time + '</div><div class="log-cell log-msg">' + msg + '</div><div class="log-cell">' + badge + '</div><div class="log-cell log-score ' + scoreCls + '">' + score + '</div><div class="log-cell log-category">' + cat + '</div></div>';
   }).join('');
-
-  // Store filtered for drawer
   list._filtered = filtered;
 }
 
-// ════ DRAWER ════
-
 function openDrawer(i) {
-  const list = document.getElementById('logList');
+  const list     = document.getElementById('logList');
   const filtered = list._filtered || allLogs;
-  const log = filtered[i];
+  const log      = filtered[i];
   if (!log) return;
 
-  const time = new Date(log.created_at).toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit' });
-  const verdict = log.action === 'block' ? '🚫 THREAT BLOCKED' : log.action === 'review' ? '⚠️ MESSAGE FLAGGED' : '✅ MESSAGE ALLOWED';
+  const time         = new Date(log.created_at).toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit' });
+  const verdict      = log.action === 'block' ? '🚫 THREAT BLOCKED' : log.action === 'review' ? '⚠️ MESSAGE FLAGGED' : '✅ MESSAGE ALLOWED';
   const verdictColor = log.action === 'block' ? 'var(--danger)' : log.action === 'review' ? 'var(--warning)' : 'var(--accent)';
 
   document.getElementById('drawerVerdict').textContent = verdict;
   document.getElementById('drawerVerdict').style.color = verdictColor;
   document.getElementById('drawerTime').textContent = time;
 
-  const score = log.final_score || 0;
-  const l1 = log.layer1_score || 0;
-  const l2 = log.layer2_score || 0;
-  const bonus = log.conversation_bonus || 0;
-  const cat = log.intent_category || 'CLEAN';
-  const conf = log.intent_confidence || '—';
-  const obj = log.intent_objective || '—';
-  const target = log.intent_target_asset || '—';
+  const score    = log.final_score || 0;
+  const l1       = log.layer1_score || 0;
+  const l2       = log.layer2_score || 0;
+  const bonus    = log.conversation_bonus || 0;
+  const cat      = log.intent_category || 'CLEAN';
+  const conf     = log.intent_confidence || '—';
+  const obj      = log.intent_objective || '—';
+  const target   = log.intent_target_asset || '—';
   const evidence = Array.isArray(log.intent_evidence) ? log.intent_evidence : [];
   const patterns = Array.isArray(log.triggered_patterns) ? log.triggered_patterns : [];
   const duration = log.duration_ms ? log.duration_ms + 'ms' : '—';
+  const scoreColor = score >= 7 ? 'var(--danger)' : score >= 5 ? 'var(--warning)' : 'var(--accent)';
 
-  document.getElementById('drawerBody').innerHTML = `
-    <div class="drawer-section">
-      <div class="drawer-label">Message Content</div>
-      <div class="drawer-message">${(log.raw_input || '—').replace(/</g,'&lt;')}</div>
-    </div>
+  const evidenceHTML = evidence.length
+    ? '<div class="drawer-section"><div class="drawer-label">AI Evidence</div><div class="evidence-list">' + evidence.map(function(e) { return '<div class="evidence-item">' + e + '</div>'; }).join('') + '</div></div>'
+    : '';
 
-    <div class="drawer-section">
-      <div class="drawer-label">Threat Classification</div>
-      <div class="drawer-meta">
-        <div class="meta-chip">
-          <div class="key">Category</div>
-          <div class="val">${cat}</div>
-        </div>
-        <div class="meta-chip">
-          <div class="key">Confidence</div>
-          <div class="val">${conf}</div>
-        </div>
-        <div class="meta-chip" style="grid-column:1/-1">
-          <div class="key">Objective Detected</div>
-          <div class="val" style="font-size:12px;line-height:1.5;word-break:break-word">${obj}</div>
-        </div>
-        <div class="meta-chip" style="grid-column:1/-1">
-          <div class="key">Target Asset</div>
-          <div class="val" style="font-size:12px">${target}</div>
-        </div>
-      </div>
-    </div>
+  const patternsHTML = patterns.length
+    ? '<div class="drawer-section"><div class="drawer-label">Triggered Patterns</div><div class="pattern-tags">' + patterns.map(function(p) { return '<span class="ptag">' + p + '</span>'; }).join('') + '</div></div>'
+    : '';
 
-    <div class="drawer-section">
-      <div class="drawer-label">Score Breakdown</div>
-      <div class="drawer-meta">
-        <div class="meta-chip">
-          <div class="key">Layer 1</div>
-          <div class="val">${l1}</div>
-        </div>
-        <div class="meta-chip">
-          <div class="key">Layer 2 (AI)</div>
-          <div class="val">${l2}</div>
-        </div>
-        <div class="meta-chip">
-          <div class="key">Conv. Bonus</div>
-          <div class="val">${bonus}</div>
-        </div>
-        <div class="meta-chip">
-          <div class="key">Final Score</div>
-          <div class="val" style="color:${score>=7?'var(--danger)':score>=5?'var(--warning)':'var(--accent)'};font-size:18px">${score}</div>
-        </div>
-      </div>
-    </div>
-
-    ${evidence.length ? `
-    <div class="drawer-section">
-      <div class="drawer-label">AI Evidence</div>
-      <div class="evidence-list">
-        ${evidence.map(e => `<div class="evidence-item">${e}</div>`).join('')}
-      </div>
-    </div>` : ''}
-
-    ${patterns.length ? `
-    <div class="drawer-section">
-      <div class="drawer-label">Triggered Patterns</div>
-      <div class="pattern-tags">
-        ${patterns.map(p => `<span class="ptag">${p}</span>`).join('')}
-      </div>
-    </div>` : ''}
-
-    <div class="drawer-section">
-      <div class="drawer-label">Request Metadata</div>
-      <div class="drawer-meta">
-        <div class="meta-chip">
-          <div class="key">Scan Time</div>
-          <div class="val">${duration}</div>
-        </div>
-        <div class="meta-chip">
-          <div class="key">Repeat Count</div>
-          <div class="val">${log.repeat_count || 0}</div>
-        </div>
-      </div>
-    </div>
-  `;
+  document.getElementById('drawerBody').innerHTML =
+    '<div class="drawer-section"><div class="drawer-label">Message Content</div><div class="drawer-message">' + (log.raw_input || '—').replace(/</g, '&lt;') + '</div></div>' +
+    '<div class="drawer-section"><div class="drawer-label">Threat Classification</div><div class="drawer-meta"><div class="meta-chip"><div class="key">Category</div><div class="val">' + cat + '</div></div><div class="meta-chip"><div class="key">Confidence</div><div class="val">' + conf + '</div></div><div class="meta-chip" style="grid-column:1/-1"><div class="key">Objective Detected</div><div class="val" style="font-size:12px;line-height:1.5;word-break:break-word">' + obj + '</div></div><div class="meta-chip" style="grid-column:1/-1"><div class="key">Target Asset</div><div class="val" style="font-size:12px">' + target + '</div></div></div></div>' +
+    '<div class="drawer-section"><div class="drawer-label">Score Breakdown</div><div class="drawer-meta"><div class="meta-chip"><div class="key">Layer 1</div><div class="val">' + l1 + '</div></div><div class="meta-chip"><div class="key">Layer 2 (AI)</div><div class="val">' + l2 + '</div></div><div class="meta-chip"><div class="key">Conv. Bonus</div><div class="val">' + bonus + '</div></div><div class="meta-chip"><div class="key">Final Score</div><div class="val" style="color:' + scoreColor + ';font-size:18px">' + score + '</div></div></div></div>' +
+    evidenceHTML + patternsHTML +
+    '<div class="drawer-section"><div class="drawer-label">Request Metadata</div><div class="drawer-meta"><div class="meta-chip"><div class="key">Scan Time</div><div class="val">' + duration + '</div></div><div class="meta-chip"><div class="key">Repeat Count</div><div class="val">' + (log.repeat_count || 0) + '</div></div></div></div>';
 
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
@@ -1225,86 +695,74 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDrawer(); });
 
-// ════ TOAST ════
-
-let toastTimer;
+var toastTimer;
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 2500);
 }
 
-// ════ AUTO-REFRESH every 60s ════
-setInterval(() => {
-  if (supabaseSession) refreshLogs();
-}, 60000);
-
-// ════ BOOT ════
-(function init() {
-  // Handle password reset token in URL
-  const hash = window.location.hash;
-  if (hash.includes('access_token') {
-    const params = new URLSearchParams(hash.substring(1));
-    const accessToken = params.get('access_token');
-    showPasswordResetForm(accessToken);
-    return;
-  }
-  const saved = loadSession();
-  if (saved?.access_token && saved?.user) {
-    supabaseSession = saved;
-    enterDashboard(saved);
-  }
-})();
+setInterval(function() { if (supabaseSession) refreshLogs(); }, 60000);
 
 function showPasswordResetForm(accessToken) {
-  document.getElementById('loginScreen').innerHTML = `
-    <div class="login-card">
-      <div class="login-logo">
-        <svg class="shield" viewBox="0 0 56 56" fill="none">
-          <path d="M28 4L8 14V28C8 39.05 16.95 50.3 28 53C39.05 50.3 48 39.05 48 28V14L28 4Z" fill="rgba(0,245,160,0.07)" stroke="#00f5a0" stroke-width="1.5"/>
-          <path d="M19 28L25 34L37 22" stroke="#00f5a0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div class="wordmark">CLAW<span>SHIELD</span></div>
-        <div class="sub">Set New Password</div>
-      </div>
-      <div class="field">
-        <label>New Password</label>
-        <input type="password" id="newPassword" placeholder="Enter new password" />
-      </div>
-      <div class="field">
-        <label>Confirm Password</label>
-        <input type="password" id="confirmPassword" placeholder="Confirm new password" />
-      </div>
-      <button class="login-btn" id="savePasswordBtn">
-        <span>Save New Password</span>
-      </button>
-      <div class="login-error" id="resetError"></div>
-    </div>`;
-  document.getElementById('savePasswordBtn').onclick = () => saveNewPassword(accessToken);
+  document.getElementById('loginScreen').innerHTML =
+    '<div class="login-card">' +
+    '<div class="login-logo">' +
+    '<svg class="shield" viewBox="0 0 56 56" fill="none">' +
+    '<path d="M28 4L8 14V28C8 39.05 16.95 50.3 28 53C39.05 50.3 48 39.05 48 28V14L28 4Z" fill="rgba(0,245,160,0.07)" stroke="#00f5a0" stroke-width="1.5"/>' +
+    '<path d="M19 28L25 34L37 22" stroke="#00f5a0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>' +
+    '<div class="wordmark">CLAW<span>SHIELD</span></div>' +
+    '<div class="sub">Set New Password</div>' +
+    '</div>' +
+    '<div class="field"><label>New Password</label><input type="password" id="newPassword" placeholder="Enter new password" /></div>' +
+    '<div class="field"><label>Confirm Password</label><input type="password" id="confirmPassword" placeholder="Confirm new password" /></div>' +
+    '<button class="login-btn" id="savePasswordBtn"><span>Save New Password</span></button>' +
+    '<div class="login-error" id="resetError"></div>' +
+    '</div>';
+  document.getElementById('savePasswordBtn').onclick = function() { saveNewPassword(accessToken); };
 }
 
 async function saveNewPassword(accessToken) {
-  const p1 = document.getElementById('newPassword').value;
-  const p2 = document.getElementById('confirmPassword').value;
+  const p1  = document.getElementById('newPassword').value;
+  const p2  = document.getElementById('confirmPassword').value;
   const err = document.getElementById('resetError');
-  if (!p1 || p1.length < 6) { err.textContent = '⚠ Password must be at least 6 characters.'; err.style.display='block'; return; }
-  if (p1 !== p2) { err.textContent = '⚠ Passwords do not match.'; err.style.display='block'; return; }
+  if (!p1 || p1.length < 6) { err.textContent = '⚠ Password must be at least 6 characters.'; err.style.display = 'block'; return; }
+  if (p1 !== p2) { err.textContent = '⚠ Passwords do not match.'; err.style.display = 'block'; return; }
   try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}` },
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken },
       body: JSON.stringify({ password: p1 })
     });
     if (!res.ok) throw await res.json();
     window.location.hash = '';
+    alert('Password updated! Please log in.');
     window.location.href = '/dashboard.html';
   } catch(e) {
-    err.textContent = '⚠ Failed to update password. Try resetting again.';
+    err.textContent = '⚠ Failed to update password. Request a new reset email.';
     err.style.display = 'block';
+  }
+}
+
+(function init() {
+  var hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    var params      = new URLSearchParams(hash.substring(1));
+    var accessToken = params.get('access_token');
+    showPasswordResetForm(accessToken);
+    return;
+  }
+  var saved = loadSession();
+  if (saved && saved.access_token && saved.user) {
+    supabaseSession = saved;
+    enterDashboard(saved);
   }
 })();
 </script>
+</body>
+</html>
