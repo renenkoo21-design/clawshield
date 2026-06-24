@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClawShield — Get Protected</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #050508;
+  --surface:  #0d0d14;
+  --surface2: #111119;
+  --border:   #1a1a2e;
+  --accent:   #00f5a0;
+  --danger:   #ff3c3c;
+  --warning:  #ffb800;
+  --text:     #e8e8f0;
+  --muted:    #5a5a72;
+  --dim:      #2a2a3e;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,245,160,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,160,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+.wrap {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 920px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── LEFT PANEL — pitch ── */
+.pitch {
+  background: var(--surface2);
+  padding: 48px 40px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.pitch-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+.pitch-logo svg { width: 32px; height: 32px; flex-shrink: 0; }
+.pitch-logo .wordmark {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 900; letter-spacing: 3px;
+}
+.pitch-logo .wordmark span { color: var(--accent); }
+
+.pitch-headline {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 30px; font-weight: 700;
+  line-height: 1.2; letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+.pitch-headline span { color: var(--accent); }
+
+.pitch-sub {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.6; margin-bottom: 36px;
+}
+
+.pitch-stat {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 4px;
+}
+.pitch-stat .num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 28px; color: var(--danger);
+}
+.pitch-stat .label {
+  font-size: 11px; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.pitch-stat-sub { font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+
+.pitch-features { display: flex; flex-direction: column; gap: 18px; margin-top: auto; }
+.pitch-feature { display: flex; align-items: flex-start; gap: 12px; }
+.pitch-feature-icon {
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.15);
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+.pitch-feature-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+.pitch-feature-text b { color: var(--accent); font-weight: 600; }
+
+/* ── RIGHT PANEL — form ── */
+.formside { padding: 48px 40px; display: flex; flex-direction: column; justify-content: center; }
+
+.step-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+.form-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px; font-weight: 700; margin-bottom: 8px;
+}
+.form-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; }
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.field input:focus {
+  border-color: rgba(0,245,160,0.4);
+  box-shadow: 0 0 0 3px rgba(0,245,160,0.08);
+}
+.field input::placeholder { color: var(--muted); }
+.field-hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+.primary-btn {
+  width: 100%; margin-top: 8px;
+  background: var(--accent);
+  color: #000;
+  border: none; border-radius: 10px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 52px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.primary-btn:hover { background: #00ffaa; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,245,160,0.3); }
+.primary-btn:active { transform: translateY(0); }
+.primary-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.form-error {
+  margin-top: 14px;
+  background: rgba(255,60,60,0.08);
+  border: 1px solid rgba(255,60,60,0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px; color: var(--danger);
+  display: none;
+  line-height: 1.5;
+}
+
+.switch-line {
+  margin-top: 24px; text-align: center;
+  font-size: 13px; color: var(--muted);
+}
+.switch-line a { color: var(--accent); text-decoration: none; cursor: pointer; }
+.switch-line a:hover { text-decoration: underline; }
+
+/* ── VERIFY STEP ── */
+.verify-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin-bottom: 24px;
+}
+.verify-email {
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--accent); font-size: 14px;
+  word-break: break-all;
+}
+
+/* ── SUCCESS / WEBHOOK STEP ── */
+.webhook-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+}
+.webhook-label {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.webhook-url {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; color: var(--accent);
+  word-break: break-all; line-height: 1.6;
+}
+.copy-btn {
+  margin-top: 12px;
+  background: rgba(0,245,160,0.1);
+  border: 1px solid rgba(0,245,160,0.2);
+  color: var(--accent);
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px; font-weight: 600;
+  padding: 8px 14px; border-radius: 6px;
+  cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(0,245,160,0.18); }
+
+.setup-steps { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
+.setup-step { display: flex; gap: 12px; align-items: flex-start; }
+.setup-step-num {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(0,245,160,0.1); border: 1px solid rgba(0,245,160,0.2);
+  color: var(--accent); font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.setup-step-text { font-size: 13px; color: var(--text); line-height: 1.5; padding-top: 2px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 760px) {
+  .wrap { grid-template-columns: 1fr; max-width: 460px; }
+  .pitch { border-right: none; border-bottom: 1px solid var(--border); padding: 36px 28px; }
+  .pitch-features { margin-top: 24px; }
+  .formside { padding: 36px 28px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- LEFT: PITCH -->
+  <div class="pitch">
+    <div class="pitch-logo">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 4L6 12V24C6 33.94 13.94 43.26 24 46C34.06 43.26 42 33.94 42 24V12L24 4Z" fill="rgba(0,245,160,0.08)" stroke="#00f5a0" stroke-width="1.5"/>
+        <path d="M16 24L21 29L32 18" stroke="#00f5a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="wordmark">CLAW<span>SHIELD</span></div>
+    </div>
+
+    <div class="pitch-headline">Your AI autoresponder is <span>talking to scammers</span> right now.</div>
+    <div class="pitch-sub">ClawShield sits in front of your GoHighLevel AI and kills wire fraud attempts before your AI ever sees the message.</div>
+
+    <div class="pitch-stat">
+      <div class="num">$145M+</div>
+      <div class="label">Lost in 2023</div>
+    </div>
+    <div class="pitch-stat-sub">Real estate is the #1 industry for wire fraud losses, every year for a decade.</div>
+
+    <div class="pitch-features">
+      <div class="pitch-feature">
+        <div class="pitch-feature-icon">🛡️</div>
+        <div class="pitch-feature-text"><b>7 detection layers</b> catch wire fraud, jailbreaks, and impersonation in milliseconds.</div>
+      </div>
+      <div class="pitch-feature">
+        <div class="pitch-feature-icon">⚡</div>
+        <div class="pitch-feature-text">Paste <b>one webhook URL</b> into GoHighLevel. No install, no IT, no training.</div>
+      </div>
+      <div class="pitch-feature">
+        <div class="pitch-feature-icon">📊</div>
+        <div class="pitch-feature-text">Every scanned message logged with <b>full audit trail</b> — your evidence if it's ever needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: FORM (multi-step) -->
+  <div class="formside" id="formside">
+    <!-- Step 1: Sign up -->
+    <div id="stepSignup">
+      <div class="step-label">Step 1 of 2</div>
+      <div class="form-title">Create your account</div>
+      <div class="form-sub">Get your personal webhook URL in under a minute.</div>
+
+      <div class="field">
+        <label for="suEmail">Email</label>
+        <input type="email" id="suEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="suPassword">Password</label>
+        <input type="password" id="suPassword" placeholder="At least 6 characters" autocomplete="new-password">
+      </div>
+
+      <button class="primary-btn" id="suBtn" onclick="doSignup()">
+        <div class="spinner" id="suSpinner"></div>
+        <span id="suBtnText">Create Account</span>
+      </button>
+
+      <div class="form-error" id="suError"></div>
+
+      <div class="switch-line">Already protected? <a onclick="goToLogin()">Sign in</a></div>
+    </div>
+
+    <!-- Step 2: Verify email (hidden by default) -->
+    <div id="stepVerify" style="display:none">
+      <div class="step-label">Step 2 of 2</div>
+      <div class="verify-icon">📩</div>
+      <div class="form-title">Check your inbox</div>
+      <div class="form-sub">We sent a verification link to<br><span class="verify-email" id="verifyEmailText">—</span></div>
+      <div class="form-sub">Click the link in that email to activate your account, then come back here and sign in.</div>
+
+      <button class="primary-btn" onclick="goToLogin()">
+        <span>I've verified — Sign in</span>
+      </button>
+
+      <div class="switch-line">Didn't get it? <a onclick="resendVerification()">Resend email</a></div>
+      <div class="form-error" id="verifyError"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://rpaerdytceslsehgomfj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_V8sWgpm3OGZVMXF3oZr8rw_5fPoC5nq";
+const LOGIN_PAGE   = "/dashboard.html";
+
+let pendingEmail = "";
+let pendingPassword = "";
+
+// Deterministic, non-reversible token derived from email.
+// Same email always yields the same token; raw email never appears in URLs or logs.
+async function emailToToken(email) {
+  const normalized = email.trim().toLowerCase();
+  const data = new TextEncoder().encode(normalized);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+}
+
+async function doSignup() {
+  const email = document.getElementById('suEmail').value.trim();
+  const password = document.getElementById('suPassword').value;
+  const errorEl = document.getElementById('suError');
+  const btn = document.getElementById('suBtn');
+  const spinner = document.getElementById('suSpinner');
+  const txt = document.getElementById('suBtnText');
+
+  errorEl.style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    showError(errorEl, 'Enter a valid email address.');
+    return;
+  }
+  if (!password || password.length < 6) {
+    showError(errorEl, 'Password must be at least 6 characters.');
+    return;
+  }
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  txt.textContent = 'Creating account...';
+
+  try {
+    const clientToken = await emailToToken(email);
+
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({
+        email,
+        password,
+        data: { client_token: clientToken }
+      })
+    });
+    const result = await res.json();
+    if (!res.ok) throw result;
+
+    pendingEmail = email;
+    pendingPassword = password;
+    showVerifyStep(email);
+
+  } catch(err) {
+    const msg = err.error_description || err.msg || err.message || 'Could not create account. Try again.';
+    showError(errorEl, msg);
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    txt.textContent = 'Create Account';
+  }
+}
+
+function showVerifyStep(email) {
+  document.getElementById('stepSignup').style.display = 'none';
+  document.getElementById('stepVerify').style.display = 'block';
+  document.getElementById('verifyEmailText').textContent = email;
+}
+
+async function resendVerification() {
+  const errorEl = document.getElementById('verifyError');
+  errorEl.style.display = 'none';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/resend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ type: 'signup', email: pendingEmail })
+    });
+    if (!res.ok) throw await res.json();
+    showError(errorEl, '✓ Verification email resent.', true);
+  } catch(e) {
+    showError(errorEl, 'Could not resend. Try again in a minute.');
+  }
+}
+
+function showError(el, msg, isSuccess) {
+  el.textContent = (isSuccess ? '' : '⚠ ') + msg;
+  el.style.color = isSuccess ? 'var(--accent)' : 'var(--danger)';
+  el.style.background = isSuccess ? 'rgba(0,245,160,0.08)' : 'rgba(255,60,60,0.08)';
+  el.style.borderColor = isSuccess ? 'rgba(0,245,160,0.2)' : 'rgba(255,60,60,0.2)';
+  el.style.display = 'block';
+}
+
+function goToLogin() {
+  window.location.href = LOGIN_PAGE;
+}
+</script>
+</body>
+</html>
