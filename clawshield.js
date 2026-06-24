@@ -1001,7 +1001,7 @@ app.post("/webhook/ghl", async (req, res) => {
     if (!messageText || typeof messageText !== "string" || !messageText.trim()) {
       res.status(200).json({ status: "ALLOWED", reason: "no_message_content", requestId }); return;
     }
-    const clientToken = body.clientToken || req.headers["x-client-token"] || "default";
+    const clientToken = req.query.clientToken || body.clientToken || req.headers["x-client-token"] || "default";
     const { decision } = await runFirewall(messageText, ip, userAgent, requestId, clientToken);
     if (decision.action === "block") {
       res.status(200).json({ status: "BLOCKED", requestId, message: "Security threat detected. Message blocked by ClawShield." }); return;
