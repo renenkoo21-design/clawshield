@@ -186,6 +186,37 @@ body::before {
 .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
 .main { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 40px 32px 80px; }
 .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; animation: fadeUp 0.6s ease 0.1s both; }
+.setup-banner {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid rgba(0,245,160,0.25);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.6s ease 0.05s both;
+}
+.setup-banner-close {
+  position: absolute; top: 16px; right: 16px;
+  background: transparent; border: none; color: var(--muted);
+  font-size: 16px; cursor: pointer; padding: 4px;
+}
+.setup-banner-close:hover { color: var(--text); }
+.setup-banner-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.setup-banner-text { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; max-width: 560px; }
+.webhook-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; max-width: 560px; }
+.webhook-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.webhook-url { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--accent); word-break: break-all; line-height: 1.6; }
+.copy-btn {
+  margin-top: 12px;
+  background: rgba(0,245,160,0.1);
+  border: 1px solid rgba(0,245,160,0.2);
+  color: var(--accent);
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px; font-weight: 600;
+  padding: 8px 14px; border-radius: 6px;
+  cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(0,245,160,0.18); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 .stat-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -365,6 +396,16 @@ body::before {
     </div>
   </div>
   <div class="main">
+    <div class="setup-banner" id="setupBanner" style="display:none">
+      <button class="setup-banner-close" onclick="dismissSetupBanner()">✕</button>
+      <div class="setup-banner-title">🔗 Connect ClawShield to GoHighLevel</div>
+      <div class="setup-banner-text">Paste this URL into your GoHighLevel webhook settings to start protecting your AI autoresponder.</div>
+      <div class="webhook-box">
+        <div class="webhook-label">Your Webhook URL</div>
+        <div class="webhook-url" id="webhookUrlText">—</div>
+        <button class="copy-btn" onclick="copyWebhookUrl()">Copy URL</button>
+      </div>
+    </div>
     <div class="hero-stats" id="heroStats">
       <div class="stat-card total">
         <span class="stat-icon">🛡️</span>
@@ -447,11 +488,20 @@ body::before {
 const SUPABASE_URL = "https://rpaerdytceslsehgomfj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_V8sWgpm3OGZVMXF3oZr8rw_5fPoC5nq";
 const LOG_TABLE    = "clawshield_logs";
-const CLIENT_TOKEN = "default";
+
+// Deterministic, non-reversible token derived from email — must match signup.html exactly.
+async function emailToToken(email) {
+  const normalized = email.trim().toLowerCase();
+  const data = new TextEncoder().encode(normalized);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+}
 
 let currentFilter  = 'all';
 let allLogs        = [];
 let supabaseSession = null;
+let currentClientToken = null;
 
 async function signIn(email, password) {
   const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
@@ -471,8 +521,8 @@ async function signOut(token) {
   });
 }
 
-async function fetchLogs(token) {
-  const url = SUPABASE_URL + '/rest/v1/' + LOG_TABLE + '?client_token=eq.' + CLIENT_TOKEN + '&order=created_at.desc&limit=100';
+async function fetchLogs(token, clientToken) {
+  const url = SUPABASE_URL + '/rest/v1/' + LOG_TABLE + '?client_token=eq.' + clientToken + '&order=created_at.desc&limit=100';
   const res = await fetch(url, {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
   });
@@ -526,13 +576,45 @@ document.getElementById('passwordInput').addEventListener('keydown', function(e)
   if (e.key === 'Enter') doLogin();
 });
 
-function enterDashboard(session) {
+async function enterDashboard(session) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   const email = (session.user && session.user.email) ? session.user.email : '—';
   document.getElementById('userEmail').textContent = email;
   document.getElementById('userAvatar').textContent = email[0].toUpperCase();
-  loadLogs(session.access_token);
+
+  // Prefer the token stored at signup; fall back to deriving it from email
+  // so accounts created before this field existed still work correctly.
+  const storedToken = session.user && session.user.user_metadata && session.user.user_metadata.client_token;
+  const clientToken = storedToken || await emailToToken(email);
+  currentClientToken = clientToken;
+
+  showSetupBanner(clientToken);
+  loadLogs(session.access_token, clientToken);
+}
+
+const WEBHOOK_BASE_URL = "https://clawshield.onrender.com/webhook/ghl";
+
+function showSetupBanner(clientToken) {
+  const dismissed = localStorage.getItem('cs_banner_dismissed_' + clientToken);
+  if (dismissed) return;
+  const url = WEBHOOK_BASE_URL + '?clientToken=' + clientToken;
+  document.getElementById('webhookUrlText').textContent = url;
+  document.getElementById('setupBanner').style.display = 'block';
+}
+
+function dismissSetupBanner() {
+  if (currentClientToken) localStorage.setItem('cs_banner_dismissed_' + currentClientToken, '1');
+  document.getElementById('setupBanner').style.display = 'none';
+}
+
+function copyWebhookUrl() {
+  const text = document.getElementById('webhookUrlText').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('Webhook URL copied.');
+  }).catch(function() {
+    showToast('Could not copy — select and copy manually.');
+  });
 }
 
 async function doLogout() {
@@ -549,9 +631,9 @@ async function doLogout() {
   showToast('Signed out.');
 }
 
-async function loadLogs(token) {
+async function loadLogs(token, clientToken) {
   try {
-    const logs = await fetchLogs(token);
+    const logs = await fetchLogs(token, clientToken || currentClientToken);
     allLogs = logs;
     renderStats(logs);
     renderTicker(logs);
@@ -565,7 +647,7 @@ async function refreshLogs() {
   if (!supabaseSession) return;
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
-  await loadLogs(supabaseSession.access_token);
+  await loadLogs(supabaseSession.access_token, currentClientToken);
   btn.classList.remove('spinning');
   showToast('Logs refreshed.');
 }
