@@ -381,7 +381,7 @@ body::before {
 <div id="dashboard">
   <div class="topbar">
     <div class="topbar-left">
-      <div class="topbar-logo">CLAW<span>SHIELD</span></div>
+      <div class="topbar-logo" onclick="window.location.href='/accounts.html'" style="cursor:pointer">CLAW<span>SHIELD</span></div>
       <div class="status-pill">
         <div class="status-dot"></div>
         Firewall Active
@@ -583,14 +583,38 @@ async function enterDashboard(session) {
   document.getElementById('userEmail').textContent = email;
   document.getElementById('userAvatar').textContent = email[0].toUpperCase();
 
-  // Prefer the token stored at signup; fall back to deriving it from email
-  // so accounts created before this field existed still work correctly.
+  const urlParams = new URLSearchParams(window.location.search);
+  const scopedAccount = urlParams.get('account');
+  const scopedName = urlParams.get('name');
+
+  if (scopedAccount) {
+    // Viewing a specific client sub-account's log, drilled into from the overview screen.
+    currentClientToken = scopedAccount;
+    showBackToAccountsLink(scopedName || scopedAccount);
+    loadLogs(session.access_token, scopedAccount);
+    return;
+  }
+
+  // No account in URL — fall back to the owner's own token (legacy single-tenant view).
   const storedToken = session.user && session.user.user_metadata && session.user.user_metadata.client_token;
   const clientToken = storedToken || await emailToToken(email);
   currentClientToken = clientToken;
 
   showSetupBanner(clientToken);
   loadLogs(session.access_token, clientToken);
+}
+
+function showBackToAccountsLink(displayName) {
+  const banner = document.getElementById('setupBanner');
+  banner.style.display = 'block';
+  banner.innerHTML =
+    '<button class="setup-banner-close" onclick="window.location.href=\'/accounts.html\'" title="Back to all accounts" style="font-size:13px">← All Accounts</button>' +
+    '<div class="setup-banner-title">' + escapeHtmlLocal(displayName) + '</div>' +
+    '<div class="setup-banner-text">Viewing this client\'s conversation log.</div>';
+}
+
+function escapeHtmlLocal(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 const WEBHOOK_BASE_URL = "https://clawshield.onrender.com/webhook/ghl";
