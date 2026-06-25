@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClawShield — Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #050508;
+  --surface:  #0d0d14;
+  --surface2: #111119;
+  --border:   #1a1a2e;
+  --accent:   #00f5a0;
+  --danger:   #ff3c3c;
+  --warning:  #ffb800;
+  --text:     #e8e8f0;
+  --muted:    #5a5a72;
+  --dim:      #2a2a3e;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,245,160,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,160,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+
+/* ── LOGIN (identical to dashboard.html for consistency) ── */
+#loginScreen { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.login-card {
+  position: relative; z-index: 1; width: 100%; max-width: 420px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 48px 40px;
+  animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+}
+.login-card::before {
+  content: ''; position: absolute; top: -1px; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+@keyframes cardIn { from { opacity: 0; transform: translateY(32px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.login-logo { text-align: center; margin-bottom: 40px; }
+.login-logo .shield { width: 56px; height: 56px; margin: 0 auto 16px; display: block; }
+.login-logo .wordmark { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; letter-spacing: 4px; color: var(--text); }
+.login-logo .wordmark span { color: var(--accent); }
+.login-logo .sub { font-size: 11px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.field input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  color: var(--text); font-family: 'Barlow', sans-serif; font-size: 15px; padding: 14px 16px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
+}
+.field input:focus { border-color: rgba(0,245,160,0.4); box-shadow: 0 0 0 3px rgba(0,245,160,0.08); }
+.field input::placeholder { color: var(--muted); }
+.login-btn, .primary-btn {
+  width: 100%; margin-top: 8px; background: var(--accent); color: #000; border: none; border-radius: 10px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; padding: 16px; cursor: pointer; transition: all 0.2s; min-height: 52px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.login-btn:hover, .primary-btn:hover { background: #00ffaa; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,245,160,0.3); }
+.login-btn:active, .primary-btn:active { transform: translateY(0); }
+.login-btn:disabled, .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.login-error {
+  margin-top: 14px; background: rgba(255,60,60,0.08); border: 1px solid rgba(255,60,60,0.2);
+  border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--danger); display: none; line-height: 1.5;
+}
+.spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000;
+  border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.switch-line { margin-top: 24px; text-align: center; font-size: 13px; color: var(--muted); }
+.switch-line a { color: var(--accent); text-decoration: none; cursor: pointer; }
+.switch-line a:hover { text-decoration: underline; }
+
+/* ── APP SHELL ── */
+#app { display: none; min-height: 100vh; }
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(5,5,8,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border); padding: 0 32px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar-left { display: flex; align-items: center; gap: 20px; }
+.topbar-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 3px; cursor: pointer; }
+.topbar-logo span { color: var(--accent); }
+.status-pill {
+  display: flex; align-items: center; gap: 7px; background: rgba(0,245,160,0.08);
+  border: 1px solid rgba(0,245,160,0.15); border-radius: 100px; padding: 5px 12px;
+  font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.user-chip { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; padding: 6px 14px 6px 8px; font-size: 12px; color: var(--muted); }
+.user-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #00a8ff); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #000; flex-shrink: 0; }
+.logout-btn { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 14px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px; }
+.logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+.main { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 40px 32px 80px; }
+
+/* ── OVERVIEW SCREEN ── */
+.overview-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; animation: fadeUp 0.6s ease 0.05s both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.overview-title { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 700; }
+.overview-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.add-client-btn {
+  background: var(--accent); color: #000; border: none; border-radius: 10px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 12px 20px;
+  cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+}
+.add-client-btn:hover { background: #00ffaa; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,245,160,0.3); }
+
+.aggregate-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+.agg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; }
+.agg-num { font-family: 'Share Tech Mono', monospace; font-size: 30px; line-height: 1; margin-bottom: 6px; }
+.agg-card.total .agg-num { color: var(--text); }
+.agg-card.flagged .agg-num { color: var(--warning); }
+.agg-card.blocked .agg-num { color: var(--danger); }
+.agg-card.accounts .agg-num { color: var(--accent); }
+.agg-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+.client-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
+  animation: fadeUp 0.6s ease 0.15s both;
+}
+.client-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 22px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+}
+.client-card:hover { border-color: rgba(0,245,160,0.3); transform: translateY(-2px); }
+.client-card.has-alert { border-color: rgba(255,60,60,0.35); }
+.client-card.has-alert::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--danger), transparent);
+}
+.client-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.client-card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.client-card-menu {
+  background: transparent; border: none; color: var(--muted); cursor: pointer;
+  font-size: 16px; padding: 2px 6px; border-radius: 6px; transition: all 0.15s; flex-shrink: 0;
+}
+.client-card-menu:hover { background: var(--surface2); color: var(--text); }
+.client-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.client-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.client-stat-num { font-family: 'Share Tech Mono', monospace; font-size: 18px; line-height: 1; }
+.client-stat-num.flagged { color: var(--warning); }
+.client-stat-num.blocked { color: var(--danger); }
+.client-stat-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.client-card-footer { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.client-card-token { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--dim); }
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 80px 24px; text-align: center; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 16px; opacity: 0.4; }
+.empty-state .title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.empty-state .sub { font-size: 13px; line-height: 1.6; max-width: 360px; margin-bottom: 20px; }
+
+.big-spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.loading-row { display: flex; align-items: center; justify-content: center; padding: 80px 24px; gap: 12px; color: var(--muted); }
+
+/* ── ADD CLIENT MODAL ── */
+#modalOverlay {
+  position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,0.6);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+#modalOverlay.open { opacity: 1; pointer-events: all; }
+.modal-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 32px; width: 100%; max-width: 420px;
+  transform: scale(0.96) translateY(8px); opacity: 0; transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+#modalOverlay.open .modal-card { transform: scale(1) translateY(0); opacity: 1; }
+.modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-cancel {
+  flex: 1; background: transparent; border: 1px solid var(--border); border-radius: 10px;
+  color: var(--muted); font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 14px; cursor: pointer; transition: all 0.2s;
+}
+.modal-cancel:hover { border-color: var(--danger); color: var(--danger); }
+.modal-confirm { flex: 2; margin-top: 0; }
+
+/* ── WEBHOOK REVEAL (after creating a client) ── */
+.webhook-reveal { display: none; }
+.webhook-reveal-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
+.webhook-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 16px 0; }
+.webhook-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.webhook-url { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--accent); word-break: break-all; line-height: 1.6; }
+.copy-btn {
+  margin-top: 12px; background: rgba(0,245,160,0.1); border: 1px solid rgba(0,245,160,0.2);
+  color: var(--accent); font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600;
+  padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(0,245,160,0.18); }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s; opacity: 0; pointer-events: none; white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+@media (max-width: 768px) {
+  .topbar { padding: 0 16px; }
+  .main { padding: 24px 16px 60px; }
+  .aggregate-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .client-grid { grid-template-columns: 1fr; }
+  .status-pill { display: none; }
+  .overview-header { flex-direction: column; align-items: stretch; }
+  .add-client-btn { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg class="shield" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M28 4L8 14V28C8 39.05 16.95 50.3 28 53C39.05 50.3 48 39.05 48 28V14L28 4Z" fill="rgba(0,245,160,0.07)" stroke="#00f5a0" stroke-width="1.5"/>
+        <path d="M19 28L25 34L37 22" stroke="#00f5a0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="wordmark">CLAW<span>SHIELD</span></div>
+      <div class="sub">Command Center</div>
+    </div>
+    <div class="field">
+      <label for="emailInput">Email</label>
+      <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="passwordInput">Password</label>
+      <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">
+      <div class="spinner" id="loginSpinner"></div>
+      <span id="loginBtnText">Access Command Center</span>
+    </button>
+    <div class="login-error" id="loginError"></div>
+    <div class="switch-line">New agency? <a onclick="window.location.href='/signup.html'">Create an account</a></div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo" onclick="showOverview()">CLAW<span>SHIELD</span></div>
+      <div class="status-pill"><div class="status-dot"></div>Firewall Active</div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span id="userEmail">—</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="overview-header">
+      <div>
+        <div class="overview-title">Client Accounts</div>
+        <div class="overview-sub" id="overviewSub">Loading your accounts...</div>
+      </div>
+      <button class="add-client-btn" onclick="openAddClientModal()">+ Add Client</button>
+    </div>
+
+    <div class="aggregate-bar" id="aggregateBar" style="display:none">
+      <div class="agg-card accounts"><div class="agg-num" id="aggAccounts">—</div><div class="agg-label">Client Accounts</div></div>
+      <div class="agg-card total"><div class="agg-num" id="aggTotal">—</div><div class="agg-label">Conversations Today</div></div>
+      <div class="agg-card flagged"><div class="agg-num" id="aggFlagged">—</div><div class="agg-label">Flagged Today</div></div>
+      <div class="agg-card blocked"><div class="agg-num" id="aggBlocked">—</div><div class="agg-label">Blocked Today</div></div>
+    </div>
+
+    <div id="clientGridWrap">
+      <div class="loading-row">
+        <div class="big-spinner"></div>
+        <span>Loading client accounts...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ ADD CLIENT MODAL ════ -->
+<div id="modalOverlay" onclick="closeModalOnBackdrop(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+
+    <!-- Step: name entry -->
+    <div id="modalStepForm">
+      <div class="modal-title">Add a client account</div>
+      <div class="modal-sub">This creates a unique webhook URL for one real estate client's GoHighLevel AI. You'll get the URL right after.</div>
+      <div class="field">
+        <label for="newClientName">Client name</label>
+        <input type="text" id="newClientName" placeholder="e.g. Sarah Chen Realty">
+      </div>
+      <div class="login-error" id="addClientError"></div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="primary-btn modal-confirm" id="addClientBtn" onclick="createClientAccount()">
+          <div class="spinner" id="addClientSpinner"></div>
+          <span id="addClientBtnText">Create Account</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step: webhook reveal -->
+    <div id="modalStepReveal" class="webhook-reveal">
+      <div class="webhook-reveal-icon">🔗</div>
+      <div class="modal-title" id="revealTitle">Account created</div>
+      <div class="modal-sub">Send this URL to be pasted into this client's GoHighLevel webhook settings. ClawShield will start protecting their AI immediately.</div>
+      <div class="webhook-box">
+        <div class="webhook-label">Webhook URL</div>
+        <div class="webhook-url" id="revealWebhookUrl">—</div>
+        <button class="copy-btn" onclick="copyRevealUrl()">Copy URL</button>
+      </div>
+      <div class="modal-actions">
+        <button class="primary-btn modal-confirm" onclick="closeModal()">Done</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://rpaerdytceslsehgomfj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_V8sWgpm3OGZVMXF3oZr8rw_5fPoC5nq";
+const WEBHOOK_BASE_URL = "https://clawshield.onrender.com/webhook/ghl";
+
+let supabaseSession = null;
+let clientAccounts = [];
+let lastCreatedToken = null;
+
+// ════ AUTH ════
+
+async function signIn(email, password) {
+  const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (!res.ok) throw data;
+  return data;
+}
+
+async function signOut(token) {
+  await fetch(SUPABASE_URL + '/auth/v1/logout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
+  });
+}
+
+function saveSession(s) { try { localStorage.setItem('cs_session', JSON.stringify(s)); } catch(e) {} }
+function loadSession()  { try { return JSON.parse(localStorage.getItem('cs_session')); } catch(e) { return null; } }
+function clearSession() { try { localStorage.removeItem('cs_session'); } catch(e) {} }
+
+async function doLogin() {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  const errorEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  const spinner = document.getElementById('loginSpinner');
+  const txt = document.getElementById('loginBtnText');
+
+  errorEl.style.display = 'none';
+  if (!email || !password) { showError(errorEl, 'Enter your email and password.'); return; }
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  txt.textContent = 'Authenticating...';
+
+  try {
+    const session = await signIn(email, password);
+    supabaseSession = session;
+    saveSession(session);
+    enterApp(session);
+  } catch(err) {
+    showError(errorEl, err.error_description || err.message || 'Authentication failed.');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    txt.textContent = 'Access Command Center';
+  }
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+function showError(el, msg) {
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+
+async function doLogout() {
+  if (supabaseSession && supabaseSession.access_token) {
+    try { await signOut(supabaseSession.access_token); } catch(e) {}
+  }
+  supabaseSession = null;
+  clearSession();
+  clientAccounts = [];
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('emailInput').value = '';
+  document.getElementById('passwordInput').value = '';
+  showToast('Signed out.');
+}
+
+function enterApp(session) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  const email = (session.user && session.user.email) ? session.user.email : '—';
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('userAvatar').textContent = email[0].toUpperCase();
+  showOverview();
+}
+
+// ════ CLIENT ACCOUNTS — fetch ════
+
+async function fetchClientAccounts(token) {
+  const url = SUPABASE_URL + '/rest/v1/client_accounts?order=created_at.desc';
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+  });
+  if (!res.ok) throw await res.json();
+  return await res.json();
+}
+
+// Pull today's logs for a given client_token to compute per-account stats.
+// RLS on clawshield_logs is not enabled (it predates this feature and is keyed
+// by token, not owner), so this filters client-side by the tokens this owner controls.
+async function fetchTodayLogsForTokens(token, tokens) {
+  if (!tokens.length) return [];
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const iso = startOfDay.toISOString();
+  const tokenList = tokens.map(t => '"' + t + '"').join(',');
+  const url = SUPABASE_URL + '/rest/v1/clawshield_logs?client_token=in.(' + tokenList + ')&created_at=gte.' + iso + '&select=client_token,action,created_at';
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+  });
+  if (!res.ok) return [];
+  return await res.json();
+}
+
+async function fetchLastActivityForTokens(token, tokens) {
+  if (!tokens.length) return {};
+  const tokenList = tokens.map(t => '"' + t + '"').join(',');
+  const url = SUPABASE_URL + '/rest/v1/clawshield_logs?client_token=in.(' + tokenList + ')&select=client_token,created_at&order=created_at.desc';
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+  });
+  if (!res.ok) return {};
+  const rows = await res.json();
+  const lastSeen = {};
+  for (const r of rows) {
+    if (!lastSeen[r.client_token]) lastSeen[r.client_token] = r.created_at;
+  }
+  return lastSeen;
+}
+
+// ════ OVERVIEW SCREEN ════
+
+async function showOverview() {
+  document.getElementById('overviewSub').textContent = 'Loading your accounts...';
+  document.getElementById('aggregateBar').style.display = 'none';
+  document.getElementById('clientGridWrap').innerHTML = '<div class="loading-row"><div class="big-spinner"></div><span>Loading client accounts...</span></div>';
+
+  try {
+    const accounts = await fetchClientAccounts(supabaseSession.access_token);
+    clientAccounts = accounts;
+
+    if (!accounts.length) {
+      document.getElementById('overviewSub').textContent = 'No client accounts yet.';
+      document.getElementById('clientGridWrap').innerHTML =
+        '<div class="empty-state">' +
+        '<div class="icon">🛡️</div>' +
+        '<div class="title">No client accounts yet</div>' +
+        '<div class="sub">Add your first real estate client to generate their webhook URL and start protecting their AI autoresponder.</div>' +
+        '<button class="add-client-btn" onclick="openAddClientModal()">+ Add Client</button>' +
+        '</div>';
+      return;
+    }
+
+    const tokens = accounts.map(a => a.client_token);
+    const [todayLogs, lastActivity] = await Promise.all([
+      fetchTodayLogsForTokens(supabaseSession.access_token, tokens),
+      fetchLastActivityForTokens(supabaseSession.access_token, tokens)
+    ]);
+
+    renderOverview(accounts, todayLogs, lastActivity);
+
+  } catch(err) {
+    document.getElementById('clientGridWrap').innerHTML =
+      '<div class="empty-state"><div class="icon">⚡</div><div class="title">Could not load accounts</div><div class="sub">Check your connection and refresh the page.</div></div>';
+  }
+}
+
+function renderOverview(accounts, todayLogs, lastActivity) {
+  const statsByToken = {};
+  for (const acc of accounts) statsByToken[acc.client_token] = { total: 0, flagged: 0, blocked: 0 };
+  for (const log of todayLogs) {
+    const s = statsByToken[log.client_token];
+    if (!s) continue;
+    s.total++;
+    if (log.action === 'review') s.flagged++;
+    if (log.action === 'block') s.blocked++;
+  }
+
+  const aggTotal = todayLogs.length;
+  const aggFlagged = todayLogs.filter(l => l.action === 'review').length;
+  const aggBlocked = todayLogs.filter(l => l.action === 'block').length;
+
+  document.getElementById('overviewSub').textContent = accounts.length + ' client account' + (accounts.length === 1 ? '' : 's') + ' under monitoring';
+  document.getElementById('aggregateBar').style.display = 'grid';
+  document.getElementById('aggAccounts').textContent = accounts.length;
+  document.getElementById('aggTotal').textContent = aggTotal;
+  document.getElementById('aggFlagged').textContent = aggFlagged;
+  document.getElementById('aggBlocked').textContent = aggBlocked;
+
+  const grid = document.createElement('div');
+  grid.className = 'client-grid';
+
+  accounts.forEach(acc => {
+    const s = statsByToken[acc.client_token] || { total: 0, flagged: 0, blocked: 0 };
+    const hasAlert = s.blocked > 0 || s.flagged > 0;
+    const lastSeen = lastActivity[acc.client_token];
+    const lastSeenText = lastSeen ? formatRelativeTime(lastSeen) : 'No activity yet';
+
+    const card = document.createElement('div');
+    card.className = 'client-card' + (hasAlert ? ' has-alert' : '');
+    card.onclick = () => openClientLog(acc.client_token, acc.client_name);
+    card.innerHTML =
+      '<div class="client-card-top">' +
+        '<div class="client-card-name">' + escapeHtml(acc.client_name) + '</div>' +
+        '<button class="client-card-menu" onclick="event.stopPropagation(); showClientMenu(\'' + acc.client_token + '\', \'' + escapeHtml(acc.client_name).replace(/'/g, "\\'") + '\')">⋯</button>' +
+      '</div>' +
+      '<div class="client-stat-row">' +
+        '<div class="client-stat"><div class="client-stat-num">' + s.total + '</div><div class="client-stat-label">Today</div></div>' +
+        '<div class="client-stat"><div class="client-stat-num flagged">' + s.flagged + '</div><div class="client-stat-label">Flagged</div></div>' +
+      '</div>' +
+      '<div class="client-stat-row">' +
+        '<div class="client-stat"><div class="client-stat-num blocked">' + s.blocked + '</div><div class="client-stat-label">Blocked</div></div>' +
+        '<div class="client-stat"><div class="client-stat-num">' + lastSeenText + '</div><div class="client-stat-label">Last Activity</div></div>' +
+      '</div>' +
+      '<div class="client-card-footer"><span class="client-card-token">' + acc.client_token + '</span><span>View log →</span></div>';
+    grid.appendChild(card);
+  });
+
+  document.getElementById('clientGridWrap').innerHTML = '';
+  document.getElementById('clientGridWrap').appendChild(grid);
+}
+
+function formatRelativeTime(iso) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'now';
+  if (mins < 60) return mins + 'm ago';
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return hours + 'h ago';
+  const days = Math.floor(hours / 24);
+  return days + 'd ago';
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function openClientLog(clientToken, clientName) {
+  window.location.href = '/dashboard.html?account=' + encodeURIComponent(clientToken) + '&name=' + encodeURIComponent(clientName);
+}
+
+function showClientMenu(clientToken, clientName) {
+  // Minimal v1: confirm + deactivate. Expand later if needed.
+  const ok = confirm('Deactivate "' + clientName + '"? Their webhook URL will stop accepting new messages. Existing logs are kept.');
+  if (ok) deactivateClient(clientToken);
+}
+
+async function deactivateClient(clientToken) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/client_accounts?client_token=eq.' + encodeURIComponent(clientToken), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + supabaseSession.access_token,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ is_active: false })
+    });
+    if (!res.ok) throw await res.json();
+    showToast('Client account deactivated.');
+    showOverview();
+  } catch(e) {
+    showToast('Could not deactivate. Try again.');
+  }
+}
+
+// ════ ADD CLIENT MODAL ════
+
+function openAddClientModal() {
+  document.getElementById('newClientName').value = '';
+  document.getElementById('addClientError').style.display = 'none';
+  document.getElementById('modalStepForm').style.display = 'block';
+  document.getElementById('modalStepReveal').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('newClientName').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeModalOnBackdrop(e) {
+  if (e.target.id === 'modalOverlay') closeModal();
+}
+
+function slugify(name) {
+  return name.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').slice(0, 30);
+}
+
+function randomSuffix() {
+  return Math.random().toString(36).slice(2, 6);
+}
+
+async function createClientAccount() {
+  const nameInput = document.getElementById('newClientName');
+  const name = nameInput.value.trim();
+  const errorEl = document.getElementById('addClientError');
+  const btn = document.getElementById('addClientBtn');
+  const spinner = document.getElementById('addClientSpinner');
+  const txt = document.getElementById('addClientBtnText');
+
+  errorEl.style.display = 'none';
+  if (!name) { showError(errorEl, 'Enter a client name.'); return; }
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  txt.textContent = 'Creating...';
+
+  const slugBase = slugify(name) || 'client';
+  let token = slugBase + '-' + randomSuffix();
+
+  try {
+    let res = await fetch(SUPABASE_URL + '/rest/v1/client_accounts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + supabaseSession.access_token,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        owner_id: supabaseSession.user.id,
+        client_name: name,
+        client_token: token
+      })
+    });
+
+    // Token collision is extremely unlikely but retry once with a new suffix if it happens.
+    if (!res.ok) {
+      const errBody = await res.json();
+      if (String(errBody.message || '').includes('duplicate')) {
+        token = slugBase + '-' + randomSuffix();
+        res = await fetch(SUPABASE_URL + '/rest/v1/client_accounts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + supabaseSession.access_token,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({ owner_id: supabaseSession.user.id, client_name: name, client_token: token })
+        });
+        if (!res.ok) throw await res.json();
+      } else {
+        throw errBody;
+      }
+    }
+
+    lastCreatedToken = token;
+    showWebhookReveal(name, token);
+    showOverview();
+
+  } catch(err) {
+    showError(errorEl, err.message || 'Could not create client account.');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    txt.textContent = 'Create Account';
+  }
+}
+
+function showWebhookReveal(name, token) {
+  const url = WEBHOOK_BASE_URL + '?clientToken=' + token;
+  document.getElementById('revealTitle').textContent = name + ' is now protected';
+  document.getElementById('revealWebhookUrl').textContent = url;
+  document.getElementById('modalStepForm').style.display = 'none';
+  document.getElementById('modalStepReveal').style.display = 'block';
+}
+
+function copyRevealUrl() {
+  const text = document.getElementById('revealWebhookUrl').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Webhook URL copied.')).catch(() => showToast('Could not copy — select and copy manually.'));
+}
+
+// ════ TOAST ════
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ════ BOOT ════
+
+(function init() {
+  const saved = loadSession();
+  if (saved && saved.access_token && saved.user) {
+    supabaseSession = saved;
+    enterApp(saved);
+  }
+})();
+</script>
+</body>
+</html>
