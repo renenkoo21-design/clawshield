@@ -555,6 +555,15 @@ async function doLogin() {
     const session = await signIn(email, password);
     supabaseSession = session;
     saveSession(session);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('account')) {
+      // Logged in directly on dashboard.html with no specific client account
+      // requested — this should never be the landing experience. Send to overview.
+      window.location.href = '/accounts.html';
+      return;
+    }
+
     enterDashboard(session);
   } catch(err) {
     showLoginError(err.error_description || err.message || 'Authentication failed.');
@@ -866,6 +875,11 @@ async function saveNewPassword(accessToken) {
   var saved = loadSession();
   if (saved && saved.access_token && saved.user) {
     supabaseSession = saved;
+    var bootParams = new URLSearchParams(window.location.search);
+    if (!bootParams.get('account')) {
+      window.location.href = '/accounts.html';
+      return;
+    }
     enterDashboard(saved);
   }
 })();
